@@ -8,6 +8,7 @@ import {
   orderDates,
   generateMonthGrid,
   yearMonthFromDate,
+  compareYearMonth,
 } from "./calendar-utils";
 
 export interface UseDateRangePickerOptions {
@@ -107,6 +108,33 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
       isSameMonth(te, leftMonth.value) || isSameMonth(te, rightMonth.value);
     return !startVisible || !endVisible;
   });
+
+  // --- Month picker ---
+
+  const monthPickerSide = ref<"left" | "right" | null>(null);
+
+  function openMonthPicker(side: "left" | "right") {
+    monthPickerSide.value = monthPickerSide.value === side ? null : side;
+  }
+
+  function selectMonth(side: "left" | "right", month: number) {
+    const current = side === "left" ? leftMonth.value : rightMonth.value;
+    const newYm: YearMonth = { year: current.year, month };
+
+    if (side === "left") {
+      leftMonth.value = { ...newYm };
+      if (compareYearMonth(newYm, rightMonth.value) >= 0) {
+        rightMonth.value = nextMonth(newYm);
+      }
+    } else {
+      rightMonth.value = { ...newYm };
+      if (compareYearMonth(newYm, leftMonth.value) <= 0) {
+        leftMonth.value = prevMonth(newYm);
+      }
+    }
+
+    monthPickerSide.value = null;
+  }
 
   // --- Actions ---
 
@@ -232,11 +260,14 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     leftGrid,
     rightGrid,
     showViewSelection,
+    monthPickerSide: computed(() => monthPickerSide.value),
     selectDay,
     navigatePrev,
     navigateNext,
     commit,
     reset,
     viewSelection,
+    openMonthPicker,
+    selectMonth,
   };
 }

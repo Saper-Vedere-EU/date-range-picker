@@ -80,3 +80,20 @@ export function generateMonthGrid(year: number, month: number): Date[][] {
 export function yearMonthFromDate(date: Date): YearMonth {
   return { year: date.getFullYear(), month: date.getMonth() + 1 };
 }
+
+/** Returns -1 if a < b, 0 if equal, 1 if a > b */
+export function compareYearMonth(a: YearMonth, b: YearMonth): number {
+  const av = a.year * 12 + a.month;
+  const bv = b.year * 12 + b.month;
+  if (av < bv) return -1;
+  if (av > bv) return 1;
+  return 0;
+}
+
+export function getMonthShortName(
+  month: number,
+  locale: string = "fr-FR",
+): string {
+  const date = new Date(2000, month - 1, 1);
+  return date.toLocaleString(locale, { month: "short" });
+}

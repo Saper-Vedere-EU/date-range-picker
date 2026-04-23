@@ -59,4 +59,56 @@ describe("CalendarMonth", () => {
     expect(w.emitted("select-day")).toHaveLength(1);
     expect(w.emitted("select-day")![0][0]).toBeInstanceOf(Date);
   });
+
+  it("emits click-header when month header is clicked", async () => {
+    const w = mount(CalendarMonth, {
+      props: { year: 2026, month: 4, grid },
+    });
+    await w.find(".drp-month-header").trigger("click");
+    expect(w.emitted("click-header")).toHaveLength(1);
+  });
+
+  describe("month picker", () => {
+    it("shows month grid when monthPickerOpen is true", () => {
+      const w = mount(CalendarMonth, {
+        props: { year: 2026, month: 4, grid, monthPickerOpen: true },
+      });
+      expect(w.find(".drp-month-grid").exists()).toBe(true);
+      expect(w.findAll(".drp-month-cell")).toHaveLength(12);
+    });
+
+    it("hides day grid when monthPickerOpen is true", () => {
+      const w = mount(CalendarMonth, {
+        props: { year: 2026, month: 4, grid, monthPickerOpen: true },
+      });
+      expect(w.findAll(".drp-week-row")).toHaveLength(0);
+      expect(w.findAll(".drp-weekday")).toHaveLength(0);
+    });
+
+    it("shows day grid when monthPickerOpen is false", () => {
+      const w = mount(CalendarMonth, {
+        props: { year: 2026, month: 4, grid, monthPickerOpen: false },
+      });
+      expect(w.find(".drp-month-grid").exists()).toBe(false);
+      expect(w.findAll(".drp-week-row")).toHaveLength(6);
+    });
+
+    it("marks the current month in the grid", () => {
+      const w = mount(CalendarMonth, {
+        props: { year: 2026, month: 4, grid, monthPickerOpen: true },
+      });
+      const currentCells = w.findAll(".drp-month-cell--current");
+      expect(currentCells).toHaveLength(1);
+    });
+
+    it("emits select-month when a month cell is clicked", async () => {
+      const w = mount(CalendarMonth, {
+        props: { year: 2026, month: 4, grid, monthPickerOpen: true },
+      });
+      const cells = w.findAll(".drp-month-cell");
+      await cells[6].trigger("click"); // July (index 6 = month 7)
+      expect(w.emitted("select-month")).toHaveLength(1);
+      expect(w.emitted("select-month")![0]).toEqual([7]);
+    });
+  });
 });

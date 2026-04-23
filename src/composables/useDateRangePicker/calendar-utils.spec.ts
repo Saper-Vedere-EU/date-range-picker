@@ -9,6 +9,8 @@ import {
   getWeekdayNames,
   generateMonthGrid,
   yearMonthFromDate,
+  compareYearMonth,
+  getMonthShortName,
 } from "./calendar-utils";
 
 describe("isSameDay", () => {
@@ -195,5 +197,46 @@ describe("yearMonthFromDate", () => {
       year: 2026,
       month: 4,
     });
+  });
+});
+
+describe("compareYearMonth", () => {
+  it("returns -1 when a is before b", () => {
+    expect(
+      compareYearMonth({ year: 2026, month: 3 }, { year: 2026, month: 4 }),
+    ).toBe(-1);
+  });
+
+  it("returns 1 when a is after b", () => {
+    expect(
+      compareYearMonth({ year: 2026, month: 5 }, { year: 2026, month: 4 }),
+    ).toBe(1);
+  });
+
+  it("returns 0 when equal", () => {
+    expect(
+      compareYearMonth({ year: 2026, month: 4 }, { year: 2026, month: 4 }),
+    ).toBe(0);
+  });
+
+  it("handles cross-year comparison", () => {
+    expect(
+      compareYearMonth({ year: 2025, month: 12 }, { year: 2026, month: 1 }),
+    ).toBe(-1);
+    expect(
+      compareYearMonth({ year: 2027, month: 1 }, { year: 2026, month: 12 }),
+    ).toBe(1);
+  });
+});
+
+describe("getMonthShortName", () => {
+  it("returns a short month name in French by default", () => {
+    const name = getMonthShortName(1);
+    expect(name.toLowerCase()).toContain("janv");
+  });
+
+  it("returns a short month name for a given locale", () => {
+    const name = getMonthShortName(4, "en-US");
+    expect(name.toLowerCase()).toContain("apr");
   });
 });

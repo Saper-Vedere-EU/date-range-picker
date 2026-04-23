@@ -8,4 +8,6 @@ export interface CalendarNavigationProps {
   rightMonth: number;
   rightGrid: MonthGrid;
   locale?: string;
+  /** Which side has the month picker open (null = none) */
+  monthPickerSide?: "left" | "right" | null;
 }

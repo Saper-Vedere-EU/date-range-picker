@@ -20,12 +20,15 @@ const {
   leftGrid,
   rightGrid,
   showViewSelection,
+  monthPickerSide,
   selectDay,
   navigatePrev,
   navigateNext,
   commit,
   reset,
   viewSelection,
+  openMonthPicker,
+  selectMonth,
 } = useDateRangePicker({
   committedStart: start,
   committedEnd: end,
@@ -42,9 +45,12 @@ const {
       :right-month="rightMonth.month"
       :right-grid="rightGrid"
       :locale="locale"
+      :month-picker-side="monthPickerSide"
       @prev="navigatePrev"
       @next="navigateNext"
       @select-day="selectDay"
+      @click-month-header="openMonthPicker"
+      @select-month="selectMonth"
     />
     <ActionBar
       :state="mode"

@@ -26,4 +26,19 @@ describe("CalendarMonthHeader", () => {
     const text = w.text();
     expect(text[0]).toBe(text[0].toUpperCase());
   });
+
+  it("emits click when clicked", async () => {
+    const w = mount(CalendarMonthHeader, {
+      props: { year: 2026, month: 4 },
+    });
+    await w.find("button").trigger("click");
+    expect(w.emitted("click")).toHaveLength(1);
+  });
+
+  it("renders as a button element", () => {
+    const w = mount(CalendarMonthHeader, {
+      props: { year: 2026, month: 4 },
+    });
+    expect(w.find("button").exists()).toBe(true);
+  });
 });

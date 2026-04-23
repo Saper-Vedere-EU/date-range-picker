@@ -6,4 +6,6 @@ export interface CalendarMonthProps {
   month: number;
   grid: MonthGrid;
   locale?: string;
+  /** Whether the month picker grid is currently shown */
+  monthPickerOpen?: boolean;
 }

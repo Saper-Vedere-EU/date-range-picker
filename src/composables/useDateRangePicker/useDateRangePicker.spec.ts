@@ -288,6 +288,116 @@ describe("useDateRangePicker", () => {
     });
   });
 
+  describe("month picker", () => {
+    it("starts with no month picker open", () => {
+      const { picker } = setup();
+      expect(picker.monthPickerSide.value).toBeNull();
+    });
+
+    it("opens month picker for left side", () => {
+      const { picker } = setup();
+      picker.openMonthPicker("left");
+      expect(picker.monthPickerSide.value).toBe("left");
+    });
+
+    it("opens month picker for right side", () => {
+      const { picker } = setup();
+      picker.openMonthPicker("right");
+      expect(picker.monthPickerSide.value).toBe("right");
+    });
+
+    it("toggles month picker off when clicking same side", () => {
+      const { picker } = setup();
+      picker.openMonthPicker("left");
+      picker.openMonthPicker("left");
+      expect(picker.monthPickerSide.value).toBeNull();
+    });
+
+    it("switches sides when clicking the other side", () => {
+      const { picker } = setup();
+      picker.openMonthPicker("left");
+      picker.openMonthPicker("right");
+      expect(picker.monthPickerSide.value).toBe("right");
+    });
+
+    it("selects a month on the left without conflict", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April, right=May
+      picker.openMonthPicker("left");
+      picker.selectMonth("left", 3); // March
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 3 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 5 }); // unchanged
+      expect(picker.monthPickerSide.value).toBeNull();
+    });
+
+    it("adjusts right when left month >= right month", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April, right=May
+      picker.selectMonth("left", 5); // May — same as right
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 5 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 6 }); // pushed to June
+    });
+
+    it("adjusts right when left month > right month", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April, right=May
+      picker.selectMonth("left", 10); // October — after right
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 10 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 11 }); // pushed to November
+    });
+
+    it("selects a month on the right without conflict", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April, right=May
+      picker.selectMonth("right", 8); // August
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 8 });
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 }); // unchanged
+    });
+
+    it("adjusts left when right month <= left month", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April, right=May
+      picker.selectMonth("right", 4); // April — same as left
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 4 });
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 3 }); // pushed to March
+    });
+
+    it("adjusts left when right month < left month", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April, right=May
+      picker.selectMonth("right", 2); // February — before left
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 2 });
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 1 }); // pushed to January
+    });
+
+    it("handles December wrap when adjusting right", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April, right=May
+      picker.selectMonth("left", 12); // December
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 12 });
+      expect(picker.rightMonth.value).toEqual({ year: 2027, month: 1 }); // January next year
+    });
+
+    it("handles January wrap when adjusting left", () => {
+      const { picker } = setup(new Date(2026, 0, 10)); // left=January, right=February
+      picker.selectMonth("right", 1); // January — same as left
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 1 });
+      expect(picker.leftMonth.value).toEqual({ year: 2025, month: 12 }); // December prev year
+    });
+
+    it("works in selecting mode", () => {
+      const { picker } = setup();
+      picker.selectDay(new Date(2026, 3, 10)); // enter selecting mode
+      expect(picker.mode.value).toBe("selecting");
+
+      picker.selectMonth("left", 8);
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 8 });
+    });
+
+    it("works in selected mode", () => {
+      const { picker } = setup();
+      picker.selectDay(new Date(2026, 3, 10));
+      picker.selectDay(new Date(2026, 3, 20)); // enter selected mode
+      expect(picker.mode.value).toBe("selected");
+
+      picker.selectMonth("right", 10);
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 10 });
+    });
+  });
+
   describe("edge cases", () => {
     it("handles range spanning year boundary", () => {
       const { picker } = setup();
