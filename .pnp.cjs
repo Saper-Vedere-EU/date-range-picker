@@ -31,6 +31,8 @@ const RAW_RUNTIME_STATE =
           ["@types/node", "npm:24.12.2"],\
           ["@vitejs/plugin-vue", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:6.0.6"],\
           ["@vitest/coverage-v8", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:4.1.5"],\
+          ["@vue/compiler-dom", "npm:3.5.33"],\
+          ["@vue/server-renderer", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:3.5.33"],\
           ["@vue/test-utils", "npm:2.4.6"],\
           ["@vue/tsconfig", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:0.9.1"],\
           ["date-range-picker", "workspace:."],\
@@ -1009,12 +1011,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:e40df5a1892bcd7417792a4d5f47c03ccd51e36f8bd219c4a75940179a55ef5aaf7341f1c9db486199b168ee3339fc445da8e68eca2eef0e61395f06b06ab8f6#npm:3.5.33", {\
-        "packageLocation": "./.yarn/__virtual__/@vue-server-renderer-virtual-f74e8365cf/3/.yarn/berry/cache/@vue-server-renderer-npm-3.5.33-f581b8b654-10c0.zip/node_modules/@vue/server-renderer/",\
+      ["virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:3.5.33", {\
+        "packageLocation": "./.yarn/__virtual__/@vue-server-renderer-virtual-98c822525a/3/.yarn/berry/cache/@vue-server-renderer-npm-3.5.33-f581b8b654-10c0.zip/node_modules/@vue/server-renderer/",\
         "packageDependencies": [\
           ["@types/vue", null],\
           ["@vue/compiler-ssr", "npm:3.5.33"],\
-          ["@vue/server-renderer", "virtual:e40df5a1892bcd7417792a4d5f47c03ccd51e36f8bd219c4a75940179a55ef5aaf7341f1c9db486199b168ee3339fc445da8e68eca2eef0e61395f06b06ab8f6#npm:3.5.33"],\
+          ["@vue/server-renderer", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:3.5.33"],\
           ["@vue/shared", "npm:3.5.33"],\
           ["vue", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:3.5.33"]\
         ],\
@@ -1386,6 +1388,8 @@ const RAW_RUNTIME_STATE =
           ["@types/node", "npm:24.12.2"],\
           ["@vitejs/plugin-vue", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:6.0.6"],\
           ["@vitest/coverage-v8", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:4.1.5"],\
+          ["@vue/compiler-dom", "npm:3.5.33"],\
+          ["@vue/server-renderer", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:3.5.33"],\
           ["@vue/test-utils", "npm:2.4.6"],\
           ["@vue/tsconfig", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:0.9.1"],\
           ["date-range-picker", "workspace:."],\
@@ -2870,7 +2874,7 @@ const RAW_RUNTIME_STATE =
           ["@vue/compiler-dom", "npm:3.5.33"],\
           ["@vue/compiler-sfc", "npm:3.5.33"],\
           ["@vue/runtime-dom", "npm:3.5.33"],\
-          ["@vue/server-renderer", "virtual:e40df5a1892bcd7417792a4d5f47c03ccd51e36f8bd219c4a75940179a55ef5aaf7341f1c9db486199b168ee3339fc445da8e68eca2eef0e61395f06b06ab8f6#npm:3.5.33"],\
+          ["@vue/server-renderer", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:3.5.33"],\
           ["@vue/shared", "npm:3.5.33"],\
           ["typescript", "patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"],\
           ["vue", "virtual:9db99174026798c43038f91fdbfc62380f8c7d1dd767537cefbf86b102715be45d2eb45e133d24e47998e1b6ef3b6eb7e10ac8ed6430c0d2aac04a47ee54548c#npm:3.5.33"]\
