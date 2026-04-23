@@ -12,6 +12,21 @@ dist
 dist-ssr
 *.local
 
+# Package tarballs
+*.tgz
+
+# Test / coverage
+coverage
+
+# Yarn PnP
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

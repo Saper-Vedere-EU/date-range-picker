@@ -11,7 +11,13 @@ export default defineConfig({
     dts({
       tsconfigPath: "./tsconfig.build.json",
       include: ["src/**/*.ts", "src/**/*.vue"],
-      exclude: ["src/**/*.spec.ts", "src/**/*.test.ts", "src/main.ts", "src/App.vue"],
+      exclude: [
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts",
+        "src/main.ts",
+        "src/App.vue",
+      ],
+      cleanVueFileName: true,
     }),
   ],
   resolve: {
@@ -22,10 +28,9 @@ export default defineConfig({
 
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: resolve(import.meta.dirname, "src", "index.ts"),
       name: "DatePicker", // Nom global pour le build UMD (si tu l'actives)
-      fileName: (format: string) =>
-        `date-range-picker.${format === "es" ? "js" : "cjs"}`,
+      fileName: "date-range-picker",
       formats: ["es", "cjs"], // ES modules + CommonJS. Ajoute 'umd' si tu veux du <script> CDN
     },
 
