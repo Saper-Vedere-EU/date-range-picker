@@ -11,7 +11,7 @@ defineEmits<{ click: [] }>()
     class="drp-nav-arrow"
     :class="`drp-nav-arrow--${direction}`"
     :disabled="disabled"
-    :aria-label="direction === 'left' ? 'Mois précédent' : 'Mois suivant'"
+    :aria-label="label"
     @click="$emit('click')"
   >
     <span aria-hidden="true">{{ direction === 'left' ? '‹' : '›' }}</span>

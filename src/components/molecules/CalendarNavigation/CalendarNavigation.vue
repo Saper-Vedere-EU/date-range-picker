@@ -151,7 +151,7 @@ onBeforeUnmount(clearPageTimer)
     @dragleave="handleDragLeave"
   >
     <slot name="nav-prev" :on-click="onPrevClick">
-      <NavArrow direction="left" @click="onPrevClick" />
+      <NavArrow direction="left" :label="messages.prevMonth" @click="onPrevClick" />
     </slot>
     <div
       class="drp-drop-indicator drp-drop-indicator--prev"
@@ -206,7 +206,7 @@ onBeforeUnmount(clearPageTimer)
       aria-hidden="true"
     />
     <slot name="nav-next" :on-click="onNextClick">
-      <NavArrow direction="right" @click="onNextClick" />
+      <NavArrow direction="right" :label="messages.nextMonth" @click="onNextClick" />
     </slot>
   </div>
 </template>

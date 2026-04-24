@@ -12,10 +12,10 @@ const emit = defineEmits<{
 <template>
   <div v-if="state === 'selected'" class="drp-action-bar">
     <button type="button" class="drp-action-btn drp-action-btn--primary" @click="emit('commit')">
-      Valider
+      {{ messages.commit }}
     </button>
     <button type="button" class="drp-action-btn drp-action-btn--secondary" @click="emit('reset')">
-      Reset
+      {{ messages.reset }}
     </button>
     <button
       v-if="showViewSelection"
@@ -23,7 +23,7 @@ const emit = defineEmits<{
       class="drp-action-btn drp-action-btn--tertiary"
       @click="emit('view-selection')"
     >
-      Voir la sélection
+      {{ messages.viewSelection }}
     </button>
   </div>
 </template>

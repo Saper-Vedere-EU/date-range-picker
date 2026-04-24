@@ -104,6 +104,30 @@ describe('DateRangePicker', () => {
     expect(newHeaders[0].text()).not.toBe(initialLeft)
   })
 
+  it('applies custom messages to action bar and nav aria-labels', async () => {
+    const w = mount(DateRangePicker, {
+      props: {
+        messages: {
+          commit: 'Apply',
+          reset: 'Cancel',
+          prevMonth: 'Previous month',
+          nextMonth: 'Next month',
+        },
+      },
+    })
+
+    expect(w.find('.drp-nav-arrow--left').attributes('aria-label')).toBe('Previous month')
+    expect(w.find('.drp-nav-arrow--right').attributes('aria-label')).toBe('Next month')
+
+    const days = getVisibleDayButtons(w)
+    await days[0].trigger('click')
+    const days2 = getVisibleDayButtons(w)
+    await days2[5].trigger('click')
+
+    expect(w.find('.drp-action-btn--primary').text()).toBe('Apply')
+    expect(w.find('.drp-action-btn--secondary').text()).toBe('Cancel')
+  })
+
   it('clicking a day in selected mode starts new selection', async () => {
     const w = mount(DateRangePicker)
 

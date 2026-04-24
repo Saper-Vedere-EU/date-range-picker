@@ -107,7 +107,12 @@ Each component folder has `ComponentName.vue`, `types.ts` (props/emits types), `
 
 ### Localisation
 
-UI strings default to French (`locale: "fr-FR"`, action-bar buttons "Valider" / "Reset" / "Voir la sélection" are hard-coded in `ActionBar.vue`). Month and weekday names go through `toLocaleString` in `calendar-utils.ts` and respect the `locale` prop propagated from `DateRangePicker`. If adding user-facing strings, match the French/i18n split already in place (format via `locale` if it's a date string; otherwise it's currently hard-coded French).
+Two independent i18n channels:
+
+- **Locale-formatted content** (month names, weekday abbreviations) goes through `toLocaleString` in `calendar-utils.ts` and respects the `locale` prop (`"fr-FR"` by default) propagated from `DateRangePicker`.
+- **Static UI labels** (action buttons, nav arrow `aria-label`s) come from `src/messages.ts`. `defaultMessages` holds French fallbacks; `DateRangePicker` accepts an optional `messages?: Partial<DateRangePickerMessages>` prop merged over the defaults and distributed down to `ActionBar` (`commit`/`reset`/`viewSelection`) and `CalendarNavigation` (`prevMonth`/`nextMonth`). Both the `defaultMessages` constant and the `DateRangePickerMessages` type are part of the public API (`src/index.ts`).
+
+If adding a new user-facing label: add a key to `DateRangePickerMessages`, a default in `defaultMessages`, and pass it down via the relevant `Pick<DateRangePickerMessages, …>` sub-type on the molecule — don't hard-code strings in templates.
 
 ### Styling
 

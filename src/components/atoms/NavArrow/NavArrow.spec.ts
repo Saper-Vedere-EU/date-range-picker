@@ -4,35 +4,32 @@ import NavArrow from './NavArrow.vue'
 
 describe('NavArrow', () => {
   it('renders left arrow', () => {
-    const w = mount(NavArrow, { props: { direction: 'left' } })
+    const w = mount(NavArrow, { props: { direction: 'left', label: 'Previous' } })
     expect(w.text()).toBe('‹')
     expect(w.find('button').classes()).toContain('drp-nav-arrow--left')
   })
 
   it('renders right arrow', () => {
-    const w = mount(NavArrow, { props: { direction: 'right' } })
+    const w = mount(NavArrow, { props: { direction: 'right', label: 'Next' } })
     expect(w.text()).toBe('›')
     expect(w.find('button').classes()).toContain('drp-nav-arrow--right')
   })
 
   it('emits click when clicked', async () => {
-    const w = mount(NavArrow, { props: { direction: 'left' } })
+    const w = mount(NavArrow, { props: { direction: 'left', label: 'Previous' } })
     await w.find('button').trigger('click')
     expect(w.emitted('click')).toHaveLength(1)
   })
 
   it('is disabled when disabled prop is true', () => {
     const w = mount(NavArrow, {
-      props: { direction: 'left', disabled: true },
+      props: { direction: 'left', label: 'Previous', disabled: true },
     })
     expect(w.find('button').attributes('disabled')).toBeDefined()
   })
 
-  it('has correct aria-label', () => {
-    const left = mount(NavArrow, { props: { direction: 'left' } })
-    expect(left.find('button').attributes('aria-label')).toBe('Mois précédent')
-
-    const right = mount(NavArrow, { props: { direction: 'right' } })
-    expect(right.find('button').attributes('aria-label')).toBe('Mois suivant')
+  it('uses the given label as aria-label', () => {
+    const w = mount(NavArrow, { props: { direction: 'left', label: 'Vorheriger Monat' } })
+    expect(w.find('button').attributes('aria-label')).toBe('Vorheriger Monat')
   })
 })

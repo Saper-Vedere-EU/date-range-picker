@@ -1,18 +1,26 @@
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { CalendarNavigation } from '@/components/molecules/CalendarNavigation'
 import { ActionBar } from '@/components/molecules/ActionBar'
 import { useDateRangePicker } from '@/composables/useDateRangePicker'
 import type { PickerState } from '@/composables/useDateRangePicker/types'
+import { defaultMessages, type DateRangePickerMessages } from '@/messages'
 
 const start = defineModel<Date | undefined>('start')
 const end = defineModel<Date | undefined>('end')
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     locale?: string
+    messages?: Partial<DateRangePickerMessages>
   }>(),
-  { locale: 'fr-FR' },
+  { locale: 'fr-FR', messages: () => ({}) },
 )
+
+const mergedMessages = computed<DateRangePickerMessages>(() => ({
+  ...defaultMessages,
+  ...props.messages,
+}))
 
 defineSlots<{
   'nav-prev'(props: { onClick: () => void }): unknown
@@ -68,6 +76,7 @@ const {
       :right-year="rightMonth.year"
       :right-month="rightMonth.month"
       :right-grid="rightGrid"
+      :messages="mergedMessages"
       :locale="locale"
       :month-picker-side="monthPickerSide"
       :year-picker-side="yearPickerSide"
@@ -105,6 +114,7 @@ const {
       <ActionBar
         :state="mode"
         :show-view-selection="showViewSelection"
+        :messages="mergedMessages"
         @commit="commit"
         @reset="reset"
         @view-selection="viewSelection"

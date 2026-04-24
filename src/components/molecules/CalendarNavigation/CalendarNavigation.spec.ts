@@ -31,6 +31,7 @@ describe('CalendarNavigation', () => {
     rightYear: 2026,
     rightMonth: 5,
     rightGrid,
+    messages: { prevMonth: 'Mois précédent', nextMonth: 'Mois suivant' },
   }
 
   it('renders two calendar months', () => {

@@ -1,4 +1,5 @@
 import type { MonthGrid } from '@/composables/useDateRangePicker/types'
+import type { DateRangePickerMessages } from '@/messages'
 
 export interface CalendarNavigationProps {
   leftYear: number
@@ -7,6 +8,7 @@ export interface CalendarNavigationProps {
   rightYear: number
   rightMonth: number
   rightGrid: MonthGrid
+  messages: Pick<DateRangePickerMessages, 'prevMonth' | 'nextMonth'>
   locale?: string
   /** Which side has the month picker open (null = none) */
   monthPickerSide?: 'left' | 'right' | null
