@@ -1,54 +1,54 @@
 <script lang="ts" setup>
-import { computed } from "vue";
-import type { CalendarMonthProps } from "./types";
-import { CalendarMonthHeader } from "@/components/atoms/CalendarMonthHeader";
-import { CalendarWeekdayRow } from "@/components/atoms/CalendarWeekdayRow";
-import { CalendarDay } from "@/components/atoms/CalendarDay";
-import { CalendarMonthCell } from "@/components/atoms/CalendarMonthCell";
-import { CalendarYearCell } from "@/components/atoms/CalendarYearCell";
-import { getMonthShortName } from "@/composables/useDateRangePicker/calendar-utils";
+import { computed } from 'vue'
+import type { CalendarMonthProps } from './types'
+import { CalendarMonthHeader } from '@/components/atoms/CalendarMonthHeader'
+import { CalendarWeekdayRow } from '@/components/atoms/CalendarWeekdayRow'
+import { CalendarDay } from '@/components/atoms/CalendarDay'
+import { CalendarMonthCell } from '@/components/atoms/CalendarMonthCell'
+import { CalendarYearCell } from '@/components/atoms/CalendarYearCell'
+import { getMonthShortName } from '@/composables/useDateRangePicker/calendar-utils'
 
 const props = withDefaults(defineProps<CalendarMonthProps>(), {
-  locale: "fr-FR",
+  locale: 'fr-FR',
   monthPickerOpen: false,
   yearPickerOpen: false,
   acceptsDrop: true,
-});
+})
 
 const emit = defineEmits<{
-  "select-day": [date: Date];
-  "select-month": [month: number];
-  "select-year": [year: number];
-  "click-month-header": [];
-  "click-year-header": [];
-  "drag-start-endpoint": [endpoint: "start" | "end"];
-  "drag-hover": [date: Date];
-  drop: [];
-  "drag-end": [];
-}>();
+  'select-day': [date: Date]
+  'select-month': [month: number]
+  'select-year': [year: number]
+  'click-month-header': []
+  'click-year-header': []
+  'drag-start-endpoint': [endpoint: 'start' | 'end']
+  'drag-hover': [date: Date]
+  drop: []
+  'drag-end': []
+}>()
 
 const monthCells = computed(() => {
-  const cells: { month: number; label: string; isCurrent: boolean }[] = [];
+  const cells: { month: number; label: string; isCurrent: boolean }[] = []
   for (let m = 1; m <= 12; m++) {
-    const raw = getMonthShortName(m, props.locale);
+    const raw = getMonthShortName(m, props.locale)
     cells.push({
       month: m,
       label: raw.charAt(0).toUpperCase() + raw.slice(1),
       isCurrent: m === props.month,
-    });
+    })
   }
-  return cells;
-});
+  return cells
+})
 
 const yearCells = computed(() => {
-  const base = props.yearPickerBaseYear ?? props.year;
-  const cells: { year: number; isCurrent: boolean }[] = [];
+  const base = props.yearPickerBaseYear ?? props.year
+  const cells: { year: number; isCurrent: boolean }[] = []
   for (let i = 0; i < 12; i++) {
-    const y = base + i;
-    cells.push({ year: y, isCurrent: y === props.year });
+    const y = base + i
+    cells.push({ year: y, isCurrent: y === props.year })
   }
-  return cells;
-});
+  return cells
+})
 </script>
 
 <template>
@@ -105,8 +105,7 @@ const yearCells = computed(() => {
               :accepts-drop="acceptsDrop"
               @click="emit('select-day', day.date)"
               @drag-start-endpoint="
-                (endpoint: 'start' | 'end') =>
-                  emit('drag-start-endpoint', endpoint)
+                (endpoint: 'start' | 'end') => emit('drag-start-endpoint', endpoint)
               "
               @drag-enter="emit('drag-hover', day.date)"
               @drop="emit('drop')"

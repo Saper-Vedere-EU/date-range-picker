@@ -1,2 +1,2 @@
-export { default as CalendarMonthHeader } from "./CalendarMonthHeader.vue";
-export type { CalendarMonthHeaderProps } from "./types";
+export { default as CalendarMonthHeader } from './CalendarMonthHeader.vue'
+export type { CalendarMonthHeaderProps } from './types'

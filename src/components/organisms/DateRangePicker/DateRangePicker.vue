@@ -1,17 +1,30 @@
 <script lang="ts" setup>
-import { CalendarNavigation } from "@/components/molecules/CalendarNavigation";
-import { ActionBar } from "@/components/molecules/ActionBar";
-import { useDateRangePicker } from "@/composables/useDateRangePicker";
+import { CalendarNavigation } from '@/components/molecules/CalendarNavigation'
+import { ActionBar } from '@/components/molecules/ActionBar'
+import { useDateRangePicker } from '@/composables/useDateRangePicker'
+import type { PickerState } from '@/composables/useDateRangePicker/types'
 
-const start = defineModel<Date | undefined>("start");
-const end = defineModel<Date | undefined>("end");
+const start = defineModel<Date | undefined>('start')
+const end = defineModel<Date | undefined>('end')
 
 withDefaults(
   defineProps<{
-    locale?: string;
+    locale?: string
   }>(),
-  { locale: "fr-FR" },
-);
+  { locale: 'fr-FR' },
+)
+
+defineSlots<{
+  'nav-prev'(props: { onClick: () => void }): unknown
+  'nav-next'(props: { onClick: () => void }): unknown
+  'action-bar'(props: {
+    state: PickerState
+    showViewSelection: boolean
+    onCommit: () => void
+    onReset: () => void
+    onViewSelection: () => void
+  }): unknown
+}>()
 
 const {
   mode,
@@ -43,7 +56,7 @@ const {
 } = useDateRangePicker({
   committedStart: start,
   committedEnd: end,
-});
+})
 </script>
 
 <template>
@@ -73,14 +86,30 @@ const {
       @drag-end="cancelDrag"
       @auto-page-prev="pageSourcePrev"
       @auto-page-next="pageSourceNext"
-    />
-    <ActionBar
+    >
+      <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
+        <slot name="nav-prev" v-bind="slotProps" />
+      </template>
+      <template v-if="$slots['nav-next']" #nav-next="slotProps">
+        <slot name="nav-next" v-bind="slotProps" />
+      </template>
+    </CalendarNavigation>
+    <slot
+      name="action-bar"
       :state="mode"
       :show-view-selection="showViewSelection"
-      @commit="commit"
-      @reset="reset"
-      @view-selection="viewSelection"
-    />
+      :on-commit="commit"
+      :on-reset="reset"
+      :on-view-selection="viewSelection"
+    >
+      <ActionBar
+        :state="mode"
+        :show-view-selection="showViewSelection"
+        @commit="commit"
+        @reset="reset"
+        @view-selection="viewSelection"
+      />
+    </slot>
   </div>
 </template>
 

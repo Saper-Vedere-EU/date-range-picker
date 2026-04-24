@@ -1,3 +1,3 @@
 export interface CalendarWeekdayRowProps {
-  locale?: string;
+  locale?: string
 }

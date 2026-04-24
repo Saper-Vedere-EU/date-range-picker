@@ -1,109 +1,107 @@
 <script lang="ts" setup>
-import { computed, ref, onBeforeUnmount } from "vue";
-import type { CalendarDayProps } from "./types";
+import { computed, ref, onBeforeUnmount } from 'vue'
+import type { CalendarDayProps } from './types'
 
 const props = withDefaults(defineProps<CalendarDayProps>(), {
   acceptsDrop: true,
-});
+})
 const emit = defineEmits<{
-  click: [];
-  "drag-start-endpoint": [endpoint: "start" | "end"];
-  "drag-enter": [];
-  drop: [];
-  "drag-end": [];
-}>();
+  click: []
+  'drag-start-endpoint': [endpoint: 'start' | 'end']
+  'drag-enter': []
+  drop: []
+  'drag-end': []
+}>()
 
-const canDrag = computed(
-  () => !props.isDisabled && (props.isRangeStart || props.isRangeEnd),
-);
+const canDrag = computed(() => !props.isDisabled && (props.isRangeStart || props.isRangeEnd))
 
-const isPressed = ref(false);
+const isPressed = ref(false)
 
 function releasePressed() {
-  isPressed.value = false;
-  document.removeEventListener("mouseup", releasePressed);
+  isPressed.value = false
+  document.removeEventListener('mouseup', releasePressed)
 }
 
 function handleMouseDown() {
-  if (props.isDisabled) return;
-  isPressed.value = true;
+  if (props.isDisabled) return
+  isPressed.value = true
   // Catch mouseup outside the button (mouseup doesn't bubble once a drag starts,
   // but this covers simple clicks and drag cancels that land elsewhere).
-  document.addEventListener("mouseup", releasePressed);
+  document.addEventListener('mouseup', releasePressed)
 }
 
 onBeforeUnmount(() => {
-  document.removeEventListener("mouseup", releasePressed);
-});
+  document.removeEventListener('mouseup', releasePressed)
+})
 
 function handleClick() {
   if (!props.isDisabled) {
-    emit("click");
+    emit('click')
   }
 }
 
 function setInvisibleDragImage(e: DragEvent) {
-  if (!e.dataTransfer) return;
-  const ghost = document.createElement("div");
-  ghost.style.position = "fixed";
-  ghost.style.top = "-1000px";
-  ghost.style.left = "-1000px";
-  ghost.style.width = "1px";
-  ghost.style.height = "1px";
-  ghost.style.opacity = "0";
-  ghost.style.pointerEvents = "none";
-  document.body.appendChild(ghost);
-  e.dataTransfer.setDragImage(ghost, 0, 0);
+  if (!e.dataTransfer) return
+  const ghost = document.createElement('div')
+  ghost.style.position = 'fixed'
+  ghost.style.top = '-1000px'
+  ghost.style.left = '-1000px'
+  ghost.style.width = '1px'
+  ghost.style.height = '1px'
+  ghost.style.opacity = '0'
+  ghost.style.pointerEvents = 'none'
+  document.body.appendChild(ghost)
+  e.dataTransfer.setDragImage(ghost, 0, 0)
   // Remove the node after the browser has snapshotted it
   requestAnimationFrame(() => {
-    if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
-  });
+    if (ghost.parentNode) ghost.parentNode.removeChild(ghost)
+  })
 }
 
 function handleDragStart(e: DragEvent) {
   if (!canDrag.value) {
-    e.preventDefault();
-    return;
+    e.preventDefault()
+    return
   }
   if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.effectAllowed = 'move'
     // Firefox requires some data to be set
-    e.dataTransfer.setData("text/plain", "");
+    e.dataTransfer.setData('text/plain', '')
   }
-  setInvisibleDragImage(e);
+  setInvisibleDragImage(e)
   // Single-day range: both flags are true → treat as "start"
-  const endpoint = props.isRangeStart ? "start" : "end";
-  emit("drag-start-endpoint", endpoint);
+  const endpoint = props.isRangeStart ? 'start' : 'end'
+  emit('drag-start-endpoint', endpoint)
 }
 
 function handleDragEnter(e: DragEvent) {
   if (!props.acceptsDrop) {
-    if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
-    return;
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'none'
+    return
   }
-  e.preventDefault();
-  emit("drag-enter");
+  e.preventDefault()
+  emit('drag-enter')
 }
 
 function handleDragOver(e: DragEvent) {
   if (!props.acceptsDrop) {
-    if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
-    return;
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'none'
+    return
   }
   // Required to allow a drop
-  e.preventDefault();
+  e.preventDefault()
 }
 
 function handleDrop(e: DragEvent) {
-  if (!props.acceptsDrop) return;
-  e.preventDefault();
-  emit("drop");
+  if (!props.acceptsDrop) return
+  e.preventDefault()
+  emit('drop')
 }
 
 function handleDragEnd() {
-  isPressed.value = false;
-  document.removeEventListener("mouseup", releasePressed);
-  emit("drag-end");
+  isPressed.value = false
+  document.removeEventListener('mouseup', releasePressed)
+  emit('drag-end')
 }
 </script>
 
@@ -165,9 +163,9 @@ function handleDragEnd() {
   cursor: grabbing;
 }
 
-.drp-day:hover:not(.drp-day--disabled):not(.drp-day--selected):not(
-    .drp-day--range-start
-  ):not(.drp-day--range-end) {
+.drp-day:hover:not(.drp-day--disabled):not(.drp-day--selected):not(.drp-day--range-start):not(
+    .drp-day--range-end
+  ) {
   background: var(--drp-day-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
 }
 

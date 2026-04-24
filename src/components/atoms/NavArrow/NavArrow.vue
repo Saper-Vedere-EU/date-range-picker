@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { NavArrowProps } from "./types";
+import type { NavArrowProps } from './types'
 
-defineProps<NavArrowProps>();
-defineEmits<{ click: [] }>();
+defineProps<NavArrowProps>()
+defineEmits<{ click: [] }>()
 </script>
 
 <template>
@@ -14,7 +14,7 @@ defineEmits<{ click: [] }>();
     :aria-label="direction === 'left' ? 'Mois précédent' : 'Mois suivant'"
     @click="$emit('click')"
   >
-    <span aria-hidden="true">{{ direction === "left" ? "‹" : "›" }}</span>
+    <span aria-hidden="true">{{ direction === 'left' ? '‹' : '›' }}</span>
   </button>
 </template>
 

@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import type { ActionBarProps } from "./types";
+import type { ActionBarProps } from './types'
 
-defineProps<ActionBarProps>();
+defineProps<ActionBarProps>()
 const emit = defineEmits<{
-  commit: [];
-  reset: [];
-  "view-selection": [];
-}>();
+  commit: []
+  reset: []
+  'view-selection': []
+}>()
 </script>
 
 <template>

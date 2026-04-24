@@ -1,6 +1,6 @@
 export interface CalendarMonthHeaderProps {
-  year: number;
+  year: number
   /** 1-indexed month */
-  month: number;
-  locale?: string;
+  month: number
+  locale?: string
 }

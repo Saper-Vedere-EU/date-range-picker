@@ -1,5 +1,5 @@
-import { ref, computed, type Ref } from "vue";
-import type { PickerState, YearMonth, DayInfo, MonthGrid } from "./types";
+import { ref, computed, type Ref } from 'vue'
+import type { PickerState, YearMonth, DayInfo, MonthGrid } from './types'
 import {
   isSameDay,
   isSameMonth,
@@ -9,265 +9,244 @@ import {
   generateMonthGrid,
   yearMonthFromDate,
   compareYearMonth,
-} from "./calendar-utils";
+} from './calendar-utils'
 
 export interface UseDateRangePickerOptions {
-  committedStart: Ref<Date | undefined>;
-  committedEnd: Ref<Date | undefined>;
+  committedStart: Ref<Date | undefined>
+  committedEnd: Ref<Date | undefined>
 }
 
 export function useDateRangePicker(options: UseDateRangePickerOptions) {
-  const { committedStart, committedEnd } = options;
+  const { committedStart, committedEnd } = options
 
-  const mode = ref<PickerState>("idle");
+  const mode = ref<PickerState>('idle')
 
-  const today = new Date();
+  const today = new Date()
   const initialYm = committedStart.value
     ? yearMonthFromDate(committedStart.value)
-    : yearMonthFromDate(today);
+    : yearMonthFromDate(today)
 
-  const leftMonth = ref<YearMonth>({ ...initialYm });
-  const rightMonth = ref<YearMonth>(nextMonth(initialYm));
+  const leftMonth = ref<YearMonth>({ ...initialYm })
+  const rightMonth = ref<YearMonth>(nextMonth(initialYm))
 
   // selecting state
-  const anchor = ref<Date | null>(null);
+  const anchor = ref<Date | null>(null)
 
   // selected state
-  const tentativeStart = ref<Date | null>(null);
-  const tentativeEnd = ref<Date | null>(null);
-  const committedStartSnapshot = ref<Date | undefined>(undefined);
-  const committedEndSnapshot = ref<Date | undefined>(undefined);
+  const tentativeStart = ref<Date | null>(null)
+  const tentativeEnd = ref<Date | null>(null)
+  const committedStartSnapshot = ref<Date | undefined>(undefined)
+  const committedEndSnapshot = ref<Date | undefined>(undefined)
 
   // drag state (active only in "selected" mode)
-  const draggingKind = ref<"start" | "end" | "range" | null>(null);
-  const dragHoverDate = ref<Date | null>(null);
+  const draggingKind = ref<'start' | 'end' | 'range' | null>(null)
+  const dragHoverDate = ref<Date | null>(null)
   /** For "range" kind: the in-range day the user originally grabbed */
-  const dragAnchorDate = ref<Date | null>(null);
+  const dragAnchorDate = ref<Date | null>(null)
   /** Which calendar the dragged boundary was visible on at drag start */
-  const dragSourceSide = ref<"left" | "right" | null>(null);
+  const dragSourceSide = ref<'left' | 'right' | null>(null)
 
   // --- Range computation ---
 
   function shiftByDays(date: Date, days: number): Date {
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d;
+    const d = new Date(date)
+    d.setDate(d.getDate() + days)
+    return d
   }
 
   function previewRange(): [Date, Date] | null {
-    if (!draggingKind.value || !dragHoverDate.value) return null;
+    if (!draggingKind.value || !dragHoverDate.value) return null
 
-    if (draggingKind.value === "range") {
-      if (
-        !dragAnchorDate.value ||
-        !tentativeStart.value ||
-        !tentativeEnd.value
-      ) {
-        return null;
+    if (draggingKind.value === 'range') {
+      if (!dragAnchorDate.value || !tentativeStart.value || !tentativeEnd.value) {
+        return null
       }
       const daysDelta = Math.round(
-        (dragHoverDate.value.getTime() - dragAnchorDate.value.getTime()) /
-          86400000,
-      );
-      if (daysDelta === 0) return null;
+        (dragHoverDate.value.getTime() - dragAnchorDate.value.getTime()) / 86400000,
+      )
+      if (daysDelta === 0) return null
       return [
         shiftByDays(tentativeStart.value, daysDelta),
         shiftByDays(tentativeEnd.value, daysDelta),
-      ];
+      ]
     }
 
-    const other =
-      draggingKind.value === "start"
-        ? tentativeEnd.value
-        : tentativeStart.value;
-    if (!other) return null;
-    return orderDates(dragHoverDate.value, other);
+    const other = draggingKind.value === 'start' ? tentativeEnd.value : tentativeStart.value
+    if (!other) return null
+    return orderDates(dragHoverDate.value, other)
   }
 
   const rangeStart = computed<Date | null>(() => {
-    if (mode.value === "selected") {
-      const preview = previewRange();
-      if (preview) return preview[0];
-      return tentativeStart.value;
+    if (mode.value === 'selected') {
+      const preview = previewRange()
+      if (preview) return preview[0]
+      return tentativeStart.value
     }
-    if (mode.value === "idle" && committedStart.value && committedEnd.value) {
-      return committedStart.value;
+    if (mode.value === 'idle' && committedStart.value && committedEnd.value) {
+      return committedStart.value
     }
-    return null;
-  });
+    return null
+  })
 
   const rangeEnd = computed<Date | null>(() => {
-    if (mode.value === "selected") {
-      const preview = previewRange();
-      if (preview) return preview[1];
-      return tentativeEnd.value;
+    if (mode.value === 'selected') {
+      const preview = previewRange()
+      if (preview) return preview[1]
+      return tentativeEnd.value
     }
-    if (mode.value === "idle" && committedStart.value && committedEnd.value) {
-      return committedEnd.value;
+    if (mode.value === 'idle' && committedStart.value && committedEnd.value) {
+      return committedEnd.value
     }
-    return null;
-  });
+    return null
+  })
 
   // --- Day info computation ---
 
   function computeDayInfo(date: Date, displayMonth: YearMonth): DayInfo {
-    const rs = rangeStart.value;
-    const re = rangeEnd.value;
-    const dateTime = date.getTime();
+    const rs = rangeStart.value
+    const re = rangeEnd.value
+    const dateTime = date.getTime()
 
     return {
       date,
       dayOfMonth: date.getDate(),
       isToday: isSameDay(date, today),
       isOutsideMonth:
-        date.getFullYear() !== displayMonth.year ||
-        date.getMonth() + 1 !== displayMonth.month,
+        date.getFullYear() !== displayMonth.year || date.getMonth() + 1 !== displayMonth.month,
       isSelected:
-        mode.value === "selecting" &&
-        anchor.value !== null &&
-        isSameDay(date, anchor.value),
+        mode.value === 'selecting' && anchor.value !== null && isSameDay(date, anchor.value),
       isRangeStart: rs !== null && isSameDay(date, rs),
       isRangeEnd: re !== null && isSameDay(date, re),
-      isInRange:
-        rs !== null &&
-        re !== null &&
-        dateTime > rs.getTime() &&
-        dateTime < re.getTime(),
+      isInRange: rs !== null && re !== null && dateTime > rs.getTime() && dateTime < re.getTime(),
       isDisabled: false,
-    };
+    }
   }
 
   function buildGrid(ym: YearMonth): MonthGrid {
-    const rawGrid = generateMonthGrid(ym.year, ym.month);
-    return rawGrid.map((week) =>
-      week.map((date) => computeDayInfo(date, ym)),
-    );
+    const rawGrid = generateMonthGrid(ym.year, ym.month)
+    return rawGrid.map((week) => week.map((date) => computeDayInfo(date, ym)))
   }
 
-  const leftGrid = computed<MonthGrid>(() => buildGrid(leftMonth.value));
-  const rightGrid = computed<MonthGrid>(() => buildGrid(rightMonth.value));
+  const leftGrid = computed<MonthGrid>(() => buildGrid(leftMonth.value))
+  const rightGrid = computed<MonthGrid>(() => buildGrid(rightMonth.value))
 
   // --- "Voir la sélection" ---
 
   const showViewSelection = computed<boolean>(() => {
-    if (mode.value !== "selected") return false;
-    const ts = tentativeStart.value;
-    const te = tentativeEnd.value;
-    if (!ts || !te) return false;
-    const startVisible =
-      isSameMonth(ts, leftMonth.value) || isSameMonth(ts, rightMonth.value);
-    const endVisible =
-      isSameMonth(te, leftMonth.value) || isSameMonth(te, rightMonth.value);
-    return !startVisible || !endVisible;
-  });
+    if (mode.value !== 'selected') return false
+    const ts = tentativeStart.value
+    const te = tentativeEnd.value
+    if (!ts || !te) return false
+    const startVisible = isSameMonth(ts, leftMonth.value) || isSameMonth(ts, rightMonth.value)
+    const endVisible = isSameMonth(te, leftMonth.value) || isSameMonth(te, rightMonth.value)
+    return !startVisible || !endVisible
+  })
 
   // --- Month / Year pickers ---
 
-  const monthPickerSide = ref<"left" | "right" | null>(null);
-  const yearPickerSide = ref<"left" | "right" | null>(null);
-  const yearPickerBaseYear = ref<number>(
-    Math.floor(initialYm.year / 12) * 12,
-  );
+  const monthPickerSide = ref<'left' | 'right' | null>(null)
+  const yearPickerSide = ref<'left' | 'right' | null>(null)
+  const yearPickerBaseYear = ref<number>(Math.floor(initialYm.year / 12) * 12)
 
-  function openMonthPicker(side: "left" | "right") {
+  function openMonthPicker(side: 'left' | 'right') {
     if (monthPickerSide.value === side) {
-      monthPickerSide.value = null;
-      return;
+      monthPickerSide.value = null
+      return
     }
-    yearPickerSide.value = null;
-    monthPickerSide.value = side;
+    yearPickerSide.value = null
+    monthPickerSide.value = side
   }
 
-  function openYearPicker(side: "left" | "right") {
+  function openYearPicker(side: 'left' | 'right') {
     if (yearPickerSide.value === side) {
-      yearPickerSide.value = null;
-      return;
+      yearPickerSide.value = null
+      return
     }
-    monthPickerSide.value = null;
-    const current = side === "left" ? leftMonth.value : rightMonth.value;
-    yearPickerBaseYear.value = Math.floor(current.year / 12) * 12;
-    yearPickerSide.value = side;
+    monthPickerSide.value = null
+    const current = side === 'left' ? leftMonth.value : rightMonth.value
+    yearPickerBaseYear.value = Math.floor(current.year / 12) * 12
+    yearPickerSide.value = side
   }
 
-  function applyYearMonth(side: "left" | "right", newYm: YearMonth) {
-    if (side === "left") {
-      leftMonth.value = { ...newYm };
+  function applyYearMonth(side: 'left' | 'right', newYm: YearMonth) {
+    if (side === 'left') {
+      leftMonth.value = { ...newYm }
       if (compareYearMonth(newYm, rightMonth.value) >= 0) {
-        rightMonth.value = nextMonth(newYm);
+        rightMonth.value = nextMonth(newYm)
       }
     } else {
-      rightMonth.value = { ...newYm };
+      rightMonth.value = { ...newYm }
       if (compareYearMonth(newYm, leftMonth.value) <= 0) {
-        leftMonth.value = prevMonth(newYm);
+        leftMonth.value = prevMonth(newYm)
       }
     }
   }
 
-  function selectMonth(side: "left" | "right", month: number) {
-    const current = side === "left" ? leftMonth.value : rightMonth.value;
-    applyYearMonth(side, { year: current.year, month });
-    monthPickerSide.value = null;
+  function selectMonth(side: 'left' | 'right', month: number) {
+    const current = side === 'left' ? leftMonth.value : rightMonth.value
+    applyYearMonth(side, { year: current.year, month })
+    monthPickerSide.value = null
   }
 
-  function selectYear(side: "left" | "right", year: number) {
-    const current = side === "left" ? leftMonth.value : rightMonth.value;
-    applyYearMonth(side, { year, month: current.month });
-    yearPickerSide.value = null;
-    monthPickerSide.value = side;
+  function selectYear(side: 'left' | 'right', year: number) {
+    const current = side === 'left' ? leftMonth.value : rightMonth.value
+    applyYearMonth(side, { year, month: current.month })
+    yearPickerSide.value = null
+    monthPickerSide.value = side
   }
 
   // --- Actions ---
 
   function selectDay(date: Date) {
-    if (mode.value === "idle" || mode.value === "selected") {
+    if (mode.value === 'idle' || mode.value === 'selected') {
       // Transition to selecting
-      anchor.value = date;
-      tentativeStart.value = null;
-      tentativeEnd.value = null;
-      mode.value = "selecting";
+      anchor.value = date
+      tentativeStart.value = null
+      tentativeEnd.value = null
+      mode.value = 'selecting'
 
       // Position calendars: anchor on left, next month on right
-      const ym = yearMonthFromDate(date);
-      leftMonth.value = { ...ym };
-      rightMonth.value = nextMonth(ym);
-    } else if (mode.value === "selecting") {
+      const ym = yearMonthFromDate(date)
+      leftMonth.value = { ...ym }
+      rightMonth.value = nextMonth(ym)
+    } else if (mode.value === 'selecting') {
       // Transition to selected
-      const [start, end] = orderDates(anchor.value!, date);
-      tentativeStart.value = start;
-      tentativeEnd.value = end;
-      committedStartSnapshot.value = committedStart.value;
-      committedEndSnapshot.value = committedEnd.value;
-      anchor.value = null;
-      mode.value = "selected";
+      const [start, end] = orderDates(anchor.value!, date)
+      tentativeStart.value = start
+      tentativeEnd.value = end
+      committedStartSnapshot.value = committedStart.value
+      committedEndSnapshot.value = committedEnd.value
+      anchor.value = null
+      mode.value = 'selected'
     }
   }
 
   function navigatePrev() {
     if (yearPickerSide.value !== null) {
-      yearPickerBaseYear.value -= 12;
-      return;
+      yearPickerBaseYear.value -= 12
+      return
     }
-    if (mode.value === "idle" || mode.value === "selected") {
-      rightMonth.value = { ...leftMonth.value };
-      leftMonth.value = prevMonth(leftMonth.value);
-    } else if (mode.value === "selecting" && anchor.value) {
-      const candidateLeft = prevMonth(leftMonth.value);
-      const candidateRight = prevMonth(rightMonth.value);
+    if (mode.value === 'idle' || mode.value === 'selected') {
+      rightMonth.value = { ...leftMonth.value }
+      leftMonth.value = prevMonth(leftMonth.value)
+    } else if (mode.value === 'selecting' && anchor.value) {
+      const candidateLeft = prevMonth(leftMonth.value)
+      const candidateRight = prevMonth(rightMonth.value)
 
-      const anchorInCandidateLeft = isSameMonth(anchor.value, candidateLeft);
-      const anchorInCandidateRight = isSameMonth(anchor.value, candidateRight);
+      const anchorInCandidateLeft = isSameMonth(anchor.value, candidateLeft)
+      const anchorInCandidateRight = isSameMonth(anchor.value, candidateRight)
 
       if (anchorInCandidateLeft || anchorInCandidateRight) {
-        leftMonth.value = candidateLeft;
-        rightMonth.value = candidateRight;
+        leftMonth.value = candidateLeft
+        rightMonth.value = candidateRight
       } else {
         // Pin the calendar that currently shows the anchor
         if (isSameMonth(anchor.value, rightMonth.value)) {
           // Pin right, move left back
-          leftMonth.value = prevMonth(leftMonth.value);
+          leftMonth.value = prevMonth(leftMonth.value)
         } else {
           // Pin left, move right back
-          rightMonth.value = prevMonth(rightMonth.value);
+          rightMonth.value = prevMonth(rightMonth.value)
         }
       }
     }
@@ -275,150 +254,146 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
 
   function navigateNext() {
     if (yearPickerSide.value !== null) {
-      yearPickerBaseYear.value += 12;
-      return;
+      yearPickerBaseYear.value += 12
+      return
     }
-    if (mode.value === "idle" || mode.value === "selected") {
-      leftMonth.value = { ...rightMonth.value };
-      rightMonth.value = nextMonth(rightMonth.value);
-    } else if (mode.value === "selecting" && anchor.value) {
-      const candidateLeft = nextMonth(leftMonth.value);
-      const candidateRight = nextMonth(rightMonth.value);
+    if (mode.value === 'idle' || mode.value === 'selected') {
+      leftMonth.value = { ...rightMonth.value }
+      rightMonth.value = nextMonth(rightMonth.value)
+    } else if (mode.value === 'selecting' && anchor.value) {
+      const candidateLeft = nextMonth(leftMonth.value)
+      const candidateRight = nextMonth(rightMonth.value)
 
-      const anchorInCandidateLeft = isSameMonth(anchor.value, candidateLeft);
-      const anchorInCandidateRight = isSameMonth(anchor.value, candidateRight);
+      const anchorInCandidateLeft = isSameMonth(anchor.value, candidateLeft)
+      const anchorInCandidateRight = isSameMonth(anchor.value, candidateRight)
 
       if (anchorInCandidateLeft || anchorInCandidateRight) {
-        leftMonth.value = candidateLeft;
-        rightMonth.value = candidateRight;
+        leftMonth.value = candidateLeft
+        rightMonth.value = candidateRight
       } else {
         // Pin the calendar that currently shows the anchor
         if (isSameMonth(anchor.value, leftMonth.value)) {
           // Pin left, move right forward
-          rightMonth.value = nextMonth(rightMonth.value);
+          rightMonth.value = nextMonth(rightMonth.value)
         } else {
           // Pin right, move left forward
-          leftMonth.value = nextMonth(leftMonth.value);
+          leftMonth.value = nextMonth(leftMonth.value)
         }
       }
     }
   }
 
   function commit() {
-    if (mode.value !== "selected") return;
-    committedStart.value = tentativeStart.value ?? undefined;
-    committedEnd.value = tentativeEnd.value ?? undefined;
-    tentativeStart.value = null;
-    tentativeEnd.value = null;
-    mode.value = "idle";
+    if (mode.value !== 'selected') return
+    committedStart.value = tentativeStart.value ?? undefined
+    committedEnd.value = tentativeEnd.value ?? undefined
+    tentativeStart.value = null
+    tentativeEnd.value = null
+    mode.value = 'idle'
   }
 
   function reset() {
-    if (mode.value !== "selected") return;
-    committedStart.value = committedStartSnapshot.value;
-    committedEnd.value = committedEndSnapshot.value;
-    tentativeStart.value = null;
-    tentativeEnd.value = null;
-    mode.value = "idle";
+    if (mode.value !== 'selected') return
+    committedStart.value = committedStartSnapshot.value
+    committedEnd.value = committedEndSnapshot.value
+    tentativeStart.value = null
+    tentativeEnd.value = null
+    mode.value = 'idle'
   }
 
   // --- Drag to adjust (selected mode only) ---
 
-  function startDragEndpoint(endpoint: "start" | "end") {
-    if (mode.value !== "selected") return;
-    draggingKind.value = endpoint;
-    dragHoverDate.value = null;
-    dragAnchorDate.value = null;
+  function startDragEndpoint(endpoint: 'start' | 'end') {
+    if (mode.value !== 'selected') return
+    draggingKind.value = endpoint
+    dragHoverDate.value = null
+    dragAnchorDate.value = null
 
-    const date =
-      endpoint === "start" ? tentativeStart.value : tentativeEnd.value;
+    const date = endpoint === 'start' ? tentativeStart.value : tentativeEnd.value
     if (date && isSameMonth(date, leftMonth.value)) {
-      dragSourceSide.value = "left";
+      dragSourceSide.value = 'left'
     } else if (date && isSameMonth(date, rightMonth.value)) {
-      dragSourceSide.value = "right";
+      dragSourceSide.value = 'right'
     } else {
-      dragSourceSide.value = null;
+      dragSourceSide.value = null
     }
   }
 
   function startDragRange(grabDate: Date) {
-    if (mode.value !== "selected") return;
-    if (!tentativeStart.value || !tentativeEnd.value) return;
-    const t = grabDate.getTime();
-    if (
-      t < tentativeStart.value.getTime() ||
-      t > tentativeEnd.value.getTime()
-    ) {
-      return;
+    if (mode.value !== 'selected') return
+    if (!tentativeStart.value || !tentativeEnd.value) return
+    const t = grabDate.getTime()
+    if (t < tentativeStart.value.getTime() || t > tentativeEnd.value.getTime()) {
+      return
     }
-    draggingKind.value = "range";
-    dragAnchorDate.value = grabDate;
-    dragHoverDate.value = null;
+    draggingKind.value = 'range'
+    dragAnchorDate.value = grabDate
+    dragHoverDate.value = null
   }
 
   function updateDragHover(date: Date) {
-    if (draggingKind.value === null) return;
-    dragHoverDate.value = date;
+    if (draggingKind.value === null) return
+    dragHoverDate.value = date
   }
 
   function commitDrag() {
-    if (draggingKind.value === null) return;
-    const preview = previewRange();
+    if (draggingKind.value === null) return
+    const preview = previewRange()
     if (preview) {
-      tentativeStart.value = preview[0];
-      tentativeEnd.value = preview[1];
+      tentativeStart.value = preview[0]
+      tentativeEnd.value = preview[1]
     }
-    draggingKind.value = null;
-    dragHoverDate.value = null;
-    dragAnchorDate.value = null;
-    dragSourceSide.value = null;
+    draggingKind.value = null
+    dragHoverDate.value = null
+    dragAnchorDate.value = null
+    dragSourceSide.value = null
   }
 
   function cancelDrag() {
-    draggingKind.value = null;
-    dragHoverDate.value = null;
-    dragAnchorDate.value = null;
-    dragSourceSide.value = null;
+    draggingKind.value = null
+    dragHoverDate.value = null
+    dragAnchorDate.value = null
+    dragSourceSide.value = null
   }
 
   function pageSourcePrev() {
-    if (dragSourceSide.value === "left") {
-      leftMonth.value = prevMonth(leftMonth.value);
-    } else if (dragSourceSide.value === "right") {
-      const candidate = prevMonth(rightMonth.value);
+    if (dragSourceSide.value === 'left') {
+      leftMonth.value = prevMonth(leftMonth.value)
+    } else if (dragSourceSide.value === 'right') {
+      const candidate = prevMonth(rightMonth.value)
       if (compareYearMonth(candidate, leftMonth.value) > 0) {
-        rightMonth.value = candidate;
+        rightMonth.value = candidate
       }
     }
   }
 
   function pageSourceNext() {
-    if (dragSourceSide.value === "left") {
-      const candidate = nextMonth(leftMonth.value);
+    if (dragSourceSide.value === 'left') {
+      const candidate = nextMonth(leftMonth.value)
       if (compareYearMonth(candidate, rightMonth.value) < 0) {
-        leftMonth.value = candidate;
+        leftMonth.value = candidate
       }
-    } else if (dragSourceSide.value === "right") {
-      rightMonth.value = nextMonth(rightMonth.value);
+    } else if (dragSourceSide.value === 'right') {
+      rightMonth.value = nextMonth(rightMonth.value)
     }
   }
 
   function viewSelection() {
-    if (mode.value !== "selected") return;
-    const ts = tentativeStart.value;
-    const te = tentativeEnd.value;
-    if (!ts || !te) return;
+    if (mode.value !== 'selected') return
+    const ts = tentativeStart.value
+    const te = tentativeEnd.value
+    if (!ts || !te) return
 
-    const startYm = yearMonthFromDate(ts);
-    const endYm = yearMonthFromDate(te);
+    const startYm = yearMonthFromDate(ts)
+    const endYm = yearMonthFromDate(te)
 
     if (startYm.year === endYm.year && startYm.month === endYm.month) {
       // Same month: left = that month, right = next
-      leftMonth.value = { ...startYm };
-      rightMonth.value = nextMonth(startYm);
+      leftMonth.value = { ...startYm }
+      rightMonth.value = nextMonth(startYm)
     } else {
-      leftMonth.value = { ...startYm };
-      rightMonth.value = { ...endYm };
+      leftMonth.value = { ...startYm }
+      rightMonth.value = { ...endYm }
     }
   }
 
@@ -451,5 +426,5 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     cancelDrag,
     pageSourcePrev,
     pageSourceNext,
-  };
+  }
 }

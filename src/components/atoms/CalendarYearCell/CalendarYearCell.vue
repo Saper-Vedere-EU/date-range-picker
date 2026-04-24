@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { CalendarYearCellProps } from "./types";
+import type { CalendarYearCellProps } from './types'
 
-defineProps<CalendarYearCellProps>();
-const emit = defineEmits<{ click: [year: number] }>();
+defineProps<CalendarYearCellProps>()
+const emit = defineEmits<{ click: [year: number] }>()
 </script>
 
 <template>
@@ -37,10 +37,7 @@ const emit = defineEmits<{ click: [year: number] }>();
 }
 
 .drp-year-cell:hover:not(.drp-year-cell--current) {
-  background: var(
-    --drp-day-hover-bg,
-    var(--accent-bg, rgba(170, 59, 255, 0.1))
-  );
+  background: var(--drp-day-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
 }
 
 .drp-year-cell--current {

@@ -1,136 +1,147 @@
 <script lang="ts" setup>
-import { ref, computed, watch, onBeforeUnmount } from "vue";
-import type { CalendarNavigationProps } from "./types";
-import { NavArrow } from "@/components/atoms/NavArrow";
-import { CalendarMonth } from "@/components/molecules/CalendarMonth";
-import { nextMonth } from "@/composables/useDateRangePicker/calendar-utils";
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import type { CalendarNavigationProps } from './types'
+import { NavArrow } from '@/components/atoms/NavArrow'
+import { CalendarMonth } from '@/components/molecules/CalendarMonth'
+import { nextMonth } from '@/composables/useDateRangePicker/calendar-utils'
 
 const props = withDefaults(defineProps<CalendarNavigationProps>(), {
-  locale: "fr-FR",
+  locale: 'fr-FR',
   monthPickerSide: null,
   yearPickerSide: null,
   dragSourceSide: null,
-});
+})
 
 const emit = defineEmits<{
-  prev: [];
-  next: [];
-  "select-day": [date: Date];
-  "click-month-header": [side: "left" | "right"];
-  "click-year-header": [side: "left" | "right"];
-  "select-month": [side: "left" | "right", month: number];
-  "select-year": [side: "left" | "right", year: number];
-  "drag-start-endpoint": [endpoint: "start" | "end"];
-  "drag-hover": [date: Date];
-  "drag-drop": [];
-  "drag-end": [];
-  "auto-page-prev": [];
-  "auto-page-next": [];
-}>();
+  prev: []
+  next: []
+  'select-day': [date: Date]
+  'click-month-header': [side: 'left' | 'right']
+  'click-year-header': [side: 'left' | 'right']
+  'select-month': [side: 'left' | 'right', month: number]
+  'select-year': [side: 'left' | 'right', year: number]
+  'drag-start-endpoint': [endpoint: 'start' | 'end']
+  'drag-hover': [date: Date]
+  'drag-drop': []
+  'drag-end': []
+  'auto-page-prev': []
+  'auto-page-next': []
+}>()
 
-const leftWrap = ref<HTMLDivElement | null>(null);
-const rightWrap = ref<HTMLDivElement | null>(null);
+defineSlots<{
+  'nav-prev'(props: { onClick: () => void }): unknown
+  'nav-next'(props: { onClick: () => void }): unknown
+}>()
+
+function onPrevClick() {
+  emit('prev')
+}
+function onNextClick() {
+  emit('next')
+}
+
+const leftWrap = ref<HTMLDivElement | null>(null)
+const rightWrap = ref<HTMLDivElement | null>(null)
 
 const isConsecutive = computed(() => {
-  const next = nextMonth({ year: props.leftYear, month: props.leftMonth });
-  return next.year === props.rightYear && next.month === props.rightMonth;
-});
+  const next = nextMonth({ year: props.leftYear, month: props.leftMonth })
+  return next.year === props.rightYear && next.month === props.rightMonth
+})
 
 const leftAcceptsDrop = computed(() => {
-  if (!props.dragSourceSide) return true;
-  if (isConsecutive.value) return true;
-  return props.dragSourceSide === "left";
-});
+  if (!props.dragSourceSide) return true
+  if (isConsecutive.value) return true
+  return props.dragSourceSide === 'left'
+})
 
 const rightAcceptsDrop = computed(() => {
-  if (!props.dragSourceSide) return true;
-  if (isConsecutive.value) return true;
-  return props.dragSourceSide === "right";
-});
+  if (!props.dragSourceSide) return true
+  if (isConsecutive.value) return true
+  return props.dragSourceSide === 'right'
+})
 
-const AUTO_PAGE_INITIAL_DELAY_MS = 500;
-const AUTO_PAGE_REPEAT_DELAY_MS = 900;
+const AUTO_PAGE_INITIAL_DELAY_MS = 500
+const AUTO_PAGE_REPEAT_DELAY_MS = 900
 
-const activeZone = ref<"prev" | "next" | null>(null);
-let pageTimerId: ReturnType<typeof setTimeout> | null = null;
+const activeZone = ref<'prev' | 'next' | null>(null)
+let pageTimerId: ReturnType<typeof setTimeout> | null = null
 
-function canPage(zone: "prev" | "next"): boolean {
-  if (!props.dragSourceSide) return false;
-  if (props.dragSourceSide === "left") {
-    return zone === "prev" || !isConsecutive.value;
+function canPage(zone: 'prev' | 'next'): boolean {
+  if (!props.dragSourceSide) return false
+  if (props.dragSourceSide === 'left') {
+    return zone === 'prev' || !isConsecutive.value
   }
-  return zone === "next" || !isConsecutive.value;
+  return zone === 'next' || !isConsecutive.value
 }
 
 function clearPageTimer() {
   if (pageTimerId !== null) {
-    clearTimeout(pageTimerId);
-    pageTimerId = null;
+    clearTimeout(pageTimerId)
+    pageTimerId = null
   }
-  activeZone.value = null;
+  activeZone.value = null
 }
 
-function schedulePaging(zone: "prev" | "next") {
+function schedulePaging(zone: 'prev' | 'next') {
   if (!canPage(zone)) {
-    clearPageTimer();
-    return;
+    clearPageTimer()
+    return
   }
-  if (activeZone.value === zone && pageTimerId !== null) return;
-  clearPageTimer();
-  activeZone.value = zone;
+  if (activeZone.value === zone && pageTimerId !== null) return
+  clearPageTimer()
+  activeZone.value = zone
   const fire = () => {
     if (!canPage(zone)) {
-      clearPageTimer();
-      return;
+      clearPageTimer()
+      return
     }
-    if (zone === "prev") {
-      emit("auto-page-prev");
+    if (zone === 'prev') {
+      emit('auto-page-prev')
     } else {
-      emit("auto-page-next");
+      emit('auto-page-next')
     }
 
-    pageTimerId = setTimeout(fire, AUTO_PAGE_REPEAT_DELAY_MS);
-  };
-  pageTimerId = setTimeout(fire, AUTO_PAGE_INITIAL_DELAY_MS);
+    pageTimerId = setTimeout(fire, AUTO_PAGE_REPEAT_DELAY_MS)
+  }
+  pageTimerId = setTimeout(fire, AUTO_PAGE_INITIAL_DELAY_MS)
 }
 
 function handleDragOver(e: DragEvent) {
   if (!props.dragSourceSide) {
-    clearPageTimer();
-    return;
+    clearPageTimer()
+    return
   }
-  const wrap =
-    props.dragSourceSide === "left" ? leftWrap.value : rightWrap.value;
+  const wrap = props.dragSourceSide === 'left' ? leftWrap.value : rightWrap.value
   if (!wrap) {
-    clearPageTimer();
-    return;
+    clearPageTimer()
+    return
   }
-  const rect = wrap.getBoundingClientRect();
+  const rect = wrap.getBoundingClientRect()
   if (e.clientX < rect.left) {
-    schedulePaging("prev");
+    schedulePaging('prev')
   } else if (e.clientX > rect.right) {
-    schedulePaging("next");
+    schedulePaging('next')
   } else {
-    clearPageTimer();
+    clearPageTimer()
   }
 }
 
 function handleDragLeave(e: DragEvent) {
-  const nav = e.currentTarget as HTMLElement;
-  const related = e.relatedTarget as Node | null;
+  const nav = e.currentTarget as HTMLElement
+  const related = e.relatedTarget as Node | null
   if (!related || !nav.contains(related)) {
-    clearPageTimer();
+    clearPageTimer()
   }
 }
 
 watch(
   () => props.dragSourceSide,
-  (v: "left" | "right" | null | undefined) => {
-    if (!v) clearPageTimer();
+  (v: 'left' | 'right' | null | undefined) => {
+    if (!v) clearPageTimer()
   },
-);
+)
 
-onBeforeUnmount(clearPageTimer);
+onBeforeUnmount(clearPageTimer)
 </script>
 
 <template>
@@ -139,7 +150,9 @@ onBeforeUnmount(clearPageTimer);
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
   >
-    <NavArrow direction="left" @click="emit('prev')" />
+    <slot name="nav-prev" :on-click="onPrevClick">
+      <NavArrow direction="left" @click="onPrevClick" />
+    </slot>
     <div
       class="drp-drop-indicator drp-drop-indicator--prev"
       :class="{ 'drp-drop-indicator--active': activeZone === 'prev' }"
@@ -160,9 +173,7 @@ onBeforeUnmount(clearPageTimer);
         @click-year-header="emit('click-year-header', 'left')"
         @select-month="(m: number) => emit('select-month', 'left', m)"
         @select-year="(y: number) => emit('select-year', 'left', y)"
-        @drag-start-endpoint="
-          (endpoint: 'start' | 'end') => emit('drag-start-endpoint', endpoint)
-        "
+        @drag-start-endpoint="(endpoint: 'start' | 'end') => emit('drag-start-endpoint', endpoint)"
         @drag-hover="(d: Date) => emit('drag-hover', d)"
         @drop="emit('drag-drop')"
         @drag-end="emit('drag-end')"
@@ -183,9 +194,7 @@ onBeforeUnmount(clearPageTimer);
         @click-year-header="emit('click-year-header', 'right')"
         @select-month="(m: number) => emit('select-month', 'right', m)"
         @select-year="(y: number) => emit('select-year', 'right', y)"
-        @drag-start-endpoint="
-          (endpoint: 'start' | 'end') => emit('drag-start-endpoint', endpoint)
-        "
+        @drag-start-endpoint="(endpoint: 'start' | 'end') => emit('drag-start-endpoint', endpoint)"
         @drag-hover="(d: Date) => emit('drag-hover', d)"
         @drop="emit('drag-drop')"
         @drag-end="emit('drag-end')"
@@ -196,7 +205,9 @@ onBeforeUnmount(clearPageTimer);
       :class="{ 'drp-drop-indicator--active': activeZone === 'next' }"
       aria-hidden="true"
     />
-    <NavArrow direction="right" @click="emit('next')" />
+    <slot name="nav-next" :on-click="onNextClick">
+      <NavArrow direction="right" @click="onNextClick" />
+    </slot>
   </div>
 </template>
 

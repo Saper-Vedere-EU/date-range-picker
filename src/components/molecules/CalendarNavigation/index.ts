@@ -1,2 +1,2 @@
-export { default as CalendarNavigation } from "./CalendarNavigation.vue";
-export type { CalendarNavigationProps } from "./types";
+export { default as CalendarNavigation } from './CalendarNavigation.vue'
+export type { CalendarNavigationProps } from './types'

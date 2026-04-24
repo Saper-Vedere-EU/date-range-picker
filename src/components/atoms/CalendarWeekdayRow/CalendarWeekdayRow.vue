@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import { computed } from "vue";
-import type { CalendarWeekdayRowProps } from "./types";
-import { getWeekdayNames } from "@/composables/useDateRangePicker/calendar-utils";
+import { computed } from 'vue'
+import type { CalendarWeekdayRowProps } from './types'
+import { getWeekdayNames } from '@/composables/useDateRangePicker/calendar-utils'
 
 const props = withDefaults(defineProps<CalendarWeekdayRowProps>(), {
-  locale: "fr-FR",
-});
+  locale: 'fr-FR',
+})
 
-const weekdays = computed(() => getWeekdayNames(props.locale));
+const weekdays = computed(() => getWeekdayNames(props.locale))
 </script>
 
 <template>

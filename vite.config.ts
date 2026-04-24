@@ -1,49 +1,44 @@
-import { defineConfig } from "vitest/config";
-import vue from "@vitejs/plugin-vue";
-import dts from "vite-plugin-dts";
-import { resolve } from "node:path";
-import { fileURLToPath, URL } from "node:url";
+import { defineConfig } from 'vitest/config'
+import vue from '@vitejs/plugin-vue'
+import dts from 'vite-plugin-dts'
+import { resolve } from 'node:path'
+import { fileURLToPath, URL } from 'node:url'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     dts({
-      tsconfigPath: "./tsconfig.build.json",
-      include: ["src/**/*.ts", "src/**/*.vue"],
-      exclude: [
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts",
-        "src/main.ts",
-        "src/App.vue",
-      ],
+      tsconfigPath: './tsconfig.build.json',
+      include: ['src/**/*.ts', 'src/**/*.vue'],
+      exclude: ['src/**/*.spec.ts', 'src/**/*.test.ts', 'src/main.ts', 'src/App.vue'],
       cleanVueFileName: true,
     }),
   ],
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 
   build: {
     lib: {
-      entry: resolve(import.meta.dirname, "src", "index.ts"),
-      name: "DatePicker", // Nom global pour le build UMD (si tu l'actives)
-      fileName: "date-range-picker",
-      formats: ["es", "cjs"], // ES modules + CommonJS. Ajoute 'umd' si tu veux du <script> CDN
+      entry: resolve(import.meta.dirname, 'src', 'index.ts'),
+      name: 'DatePicker', // Nom global pour le build UMD (si tu l'actives)
+      fileName: 'date-range-picker',
+      formats: ['es', 'cjs'], // ES modules + CommonJS. Ajoute 'umd' si tu veux du <script> CDN
     },
 
     rollupOptions: {
       // Ne bundle PAS Vue avec ton package : il doit venir du projet consommateur
-      external: ["vue"],
+      external: ['vue'],
       output: {
         // Nom de la variable globale pour le build UMD
         globals: {
-          vue: "Vue",
+          vue: 'Vue',
         },
         // Préserve les modules pour permettre le tree-shaking côté consommateur
-        exports: "named",
+        exports: 'named',
       },
     },
 
@@ -57,7 +52,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   test: {
-    environment: "happy-dom",
-    include: ["src/**/*.spec.ts"],
+    environment: 'happy-dom',
+    include: ['src/**/*.spec.ts'],
   },
-});
+})

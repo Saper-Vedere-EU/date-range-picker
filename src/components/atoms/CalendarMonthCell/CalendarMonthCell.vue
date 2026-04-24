@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { CalendarMonthCellProps } from "./types";
+import type { CalendarMonthCellProps } from './types'
 
-defineProps<CalendarMonthCellProps>();
-const emit = defineEmits<{ click: [month: number] }>();
+defineProps<CalendarMonthCellProps>()
+const emit = defineEmits<{ click: [month: number] }>()
 </script>
 
 <template>
@@ -37,10 +37,7 @@ const emit = defineEmits<{ click: [month: number] }>();
 }
 
 .drp-month-cell:hover:not(.drp-month-cell--current) {
-  background: var(
-    --drp-day-hover-bg,
-    var(--accent-bg, rgba(170, 59, 255, 0.1))
-  );
+  background: var(--drp-day-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
 }
 
 .drp-month-cell--current {

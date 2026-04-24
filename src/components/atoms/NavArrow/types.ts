@@ -1,4 +1,4 @@
 export interface NavArrowProps {
-  direction: "left" | "right";
-  disabled?: boolean;
+  direction: 'left' | 'right'
+  disabled?: boolean
 }

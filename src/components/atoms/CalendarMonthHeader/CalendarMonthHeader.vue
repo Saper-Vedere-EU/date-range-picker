@@ -1,21 +1,21 @@
 <script lang="ts" setup>
-import { computed } from "vue";
-import type { CalendarMonthHeaderProps } from "./types";
-import { getMonthName } from "@/composables/useDateRangePicker/calendar-utils";
+import { computed } from 'vue'
+import type { CalendarMonthHeaderProps } from './types'
+import { getMonthName } from '@/composables/useDateRangePicker/calendar-utils'
 
 const props = withDefaults(defineProps<CalendarMonthHeaderProps>(), {
-  locale: "fr-FR",
-});
+  locale: 'fr-FR',
+})
 
 const emit = defineEmits<{
-  "click-month": [];
-  "click-year": [];
-}>();
+  'click-month': []
+  'click-year': []
+}>()
 
 const monthLabel = computed(() => {
-  const name = getMonthName(props.month, props.locale);
-  return `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
-});
+  const name = getMonthName(props.month, props.locale)
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)}`
+})
 </script>
 
 <template>
@@ -60,9 +60,6 @@ const monthLabel = computed(() => {
 }
 
 .drp-month-header__btn:hover {
-  background: var(
-    --drp-day-hover-bg,
-    var(--accent-bg, rgba(170, 59, 255, 0.1))
-  );
+  background: var(--drp-day-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
 }
 </style>

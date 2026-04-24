@@ -1,23 +1,25 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { DateRangePicker } from "./components/organisms/DateRangePicker";
+import { ref } from 'vue'
+import { DateRangePicker } from './components/organisms/DateRangePicker'
 
-const start = ref<Date | undefined>();
-const end = ref<Date | undefined>();
+const start = ref<Date | undefined>()
+const end = ref<Date | undefined>()
 </script>
 
 <template>
   <div id="demo">
     <h2>DateRangePicker Demo</h2>
-    <DateRangePicker v-model:start="start" v-model:end="end" />
+    <DateRangePicker v-model:start="start" v-model:end="end">
+      <template #action-bar="{ onCommit }"><button @click="onCommit">commit</button></template>
+    </DateRangePicker>
     <div class="debug">
       <p>
         <strong>Start:</strong>
-        {{ start ? start.toLocaleDateString("fr-FR") : "—" }}
+        {{ start ? start.toLocaleDateString('fr-FR') : '—' }}
       </p>
       <p>
         <strong>End:</strong>
-        {{ end ? end.toLocaleDateString("fr-FR") : "—" }}
+        {{ end ? end.toLocaleDateString('fr-FR') : '—' }}
       </p>
     </div>
   </div>
