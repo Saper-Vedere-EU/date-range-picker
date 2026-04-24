@@ -19,6 +19,42 @@ Package manager: Yarn (see `.yarnrc.yml`). Import alias `@/` → `src/` is defin
 
 Tests use `@vue/test-utils` and are co-located with the file under test as `*.spec.ts` (the Vitest `include` glob is `src/**/*.spec.ts` — `.test.ts` files are ignored).
 
+## Development workflow
+
+Applies to any **non-trivial task** (anything beyond a typo or a one-line fix on an already-checked-out branch). The goal is that multiple Claude sessions can work in parallel in isolated worktrees without colliding.
+
+1. **Always start from an up-to-date `main`.** Before creating a new branch or worktree:
+   ```
+   git fetch origin
+   ```
+   Base the new branch on `origin/main`, not the current `HEAD`.
+
+2. **One task = one branch = one PR.** Branch name: `<type>/<kebab-name>` where `<type>` is one of `feat`, `fix`, `chore`, `refactor` (inferred from existing `git log`). Example: `feat/slot-customization`.
+
+3. **Work in a dedicated git worktree** so parallel sessions don't step on each other:
+   ```
+   git worktree add ../date-range-picker-<short-name> -b <type>/<short-name> origin/main
+   ```
+   After the PR is merged, clean up:
+   ```
+   git worktree remove ../date-range-picker-<short-name>
+   ```
+   Never switch branches inside an existing worktree to "save time" — open a second worktree instead.
+
+4. **Gate before opening the PR.** Both must pass locally:
+   ```
+   yarn typecheck && yarn test
+   ```
+   Never bypass with `--no-verify`.
+
+5. **Conventional Commits with optional scope**, matching the existing `git log` style: `feat(calendar-grid): …`, `fix(drag): …`, `chore: …`. Lowercase subject, no trailing period.
+
+6. **PR targets `main`.** Title = the primary commit subject. Body has a `## Summary` section and a `## Test plan` checklist.
+
+7. **Scope discipline: one PR = one concern.** If an unrelated issue surfaces mid-task, note it and move on — open a separate PR rather than bundling.
+
+8. **Delegated agents that do real work** (not just research) are spawned with `isolation: "worktree"` so they operate on their own copy of the repo, independent of the session's worktree.
+
 ## Architecture
 
 ### State lives in a composable, components are dumb
