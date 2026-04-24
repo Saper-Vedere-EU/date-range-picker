@@ -1,5 +1,4 @@
-/// <reference types="vitest" />
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import vue from "@vitejs/plugin-vue";
 import dts from "vite-plugin-dts";
 import { resolve } from "node:path";
@@ -57,7 +56,6 @@ export default defineConfig({
     // Ne vide pas le dossier dist entre deux builds (utile en mode watch)
     emptyOutDir: true,
   },
-
   test: {
     environment: "happy-dom",
     include: ["src/**/*.spec.ts"],

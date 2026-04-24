@@ -1,8 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, type VueWrapper } from "@vue/test-utils";
 import DateRangePicker from "./DateRangePicker.vue";
 
-function getVisibleDayButtons(wrapper: ReturnType<typeof mount>) {
+type PickerWrapper = VueWrapper<InstanceType<typeof DateRangePicker>>;
+
+function getVisibleDayButtons(wrapper: PickerWrapper) {
   return wrapper
     .findAll(".drp-day")
     .filter((btn) => !btn.classes().includes("drp-day--outside"));
@@ -21,12 +23,12 @@ describe("DateRangePicker", () => {
   });
 
   it("full flow: select range, validate, emits v-model", async () => {
-    const w = mount(DateRangePicker, {
+    const w: PickerWrapper = mount(DateRangePicker, {
       props: {
         start: undefined,
         end: undefined,
-        "onUpdate:start": (v: Date) => w.setProps({ start: v }),
-        "onUpdate:end": (v: Date) => w.setProps({ end: v }),
+        "onUpdate:start": (v: Date | undefined) => w.setProps({ start: v }),
+        "onUpdate:end": (v: Date | undefined) => w.setProps({ end: v }),
       },
     });
 
@@ -60,12 +62,12 @@ describe("DateRangePicker", () => {
     const originalStart = new Date(2026, 3, 5);
     const originalEnd = new Date(2026, 3, 10);
 
-    const w = mount(DateRangePicker, {
+    const w: PickerWrapper = mount(DateRangePicker, {
       props: {
         start: originalStart,
         end: originalEnd,
-        "onUpdate:start": (v: Date) => w.setProps({ start: v }),
-        "onUpdate:end": (v: Date) => w.setProps({ end: v }),
+        "onUpdate:start": (v: Date | undefined) => w.setProps({ start: v }),
+        "onUpdate:end": (v: Date | undefined) => w.setProps({ end: v }),
       },
     });
 

@@ -83,7 +83,12 @@ function schedulePaging(zone: "prev" | "next") {
       clearPageTimer();
       return;
     }
-    emit(zone === "prev" ? "auto-page-prev" : "auto-page-next");
+    if (zone === "prev") {
+      emit("auto-page-prev");
+    } else {
+      emit("auto-page-next");
+    }
+
     pageTimerId = setTimeout(fire, AUTO_PAGE_REPEAT_DELAY_MS);
   };
   pageTimerId = setTimeout(fire, AUTO_PAGE_INITIAL_DELAY_MS);
