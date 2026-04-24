@@ -43,6 +43,8 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   const dragHoverDate = ref<Date | null>(null);
   /** For "range" kind: the in-range day the user originally grabbed */
   const dragAnchorDate = ref<Date | null>(null);
+  /** Which calendar the dragged boundary was visible on at drag start */
+  const dragSourceSide = ref<"left" | "right" | null>(null);
 
   // --- Range computation ---
 
@@ -327,6 +329,16 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     draggingKind.value = endpoint;
     dragHoverDate.value = null;
     dragAnchorDate.value = null;
+
+    const date =
+      endpoint === "start" ? tentativeStart.value : tentativeEnd.value;
+    if (date && isSameMonth(date, leftMonth.value)) {
+      dragSourceSide.value = "left";
+    } else if (date && isSameMonth(date, rightMonth.value)) {
+      dragSourceSide.value = "right";
+    } else {
+      dragSourceSide.value = null;
+    }
   }
 
   function startDragRange(grabDate: Date) {
@@ -359,12 +371,36 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     draggingKind.value = null;
     dragHoverDate.value = null;
     dragAnchorDate.value = null;
+    dragSourceSide.value = null;
   }
 
   function cancelDrag() {
     draggingKind.value = null;
     dragHoverDate.value = null;
     dragAnchorDate.value = null;
+    dragSourceSide.value = null;
+  }
+
+  function pageSourcePrev() {
+    if (dragSourceSide.value === "left") {
+      leftMonth.value = prevMonth(leftMonth.value);
+    } else if (dragSourceSide.value === "right") {
+      const candidate = prevMonth(rightMonth.value);
+      if (compareYearMonth(candidate, leftMonth.value) > 0) {
+        rightMonth.value = candidate;
+      }
+    }
+  }
+
+  function pageSourceNext() {
+    if (dragSourceSide.value === "left") {
+      const candidate = nextMonth(leftMonth.value);
+      if (compareYearMonth(candidate, rightMonth.value) < 0) {
+        leftMonth.value = candidate;
+      }
+    } else if (dragSourceSide.value === "right") {
+      rightMonth.value = nextMonth(rightMonth.value);
+    }
   }
 
   function viewSelection() {
@@ -407,10 +443,13 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     openYearPicker,
     selectYear,
     draggingKind: computed(() => draggingKind.value),
+    dragSourceSide: computed(() => dragSourceSide.value),
     startDragEndpoint,
     startDragRange,
     updateDragHover,
     commitDrag,
     cancelDrag,
+    pageSourcePrev,
+    pageSourceNext,
   };
 }

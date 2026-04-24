@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<CalendarMonthProps>(), {
   locale: "fr-FR",
   monthPickerOpen: false,
   yearPickerOpen: false,
+  acceptsDrop: true,
 });
 
 const emit = defineEmits<{
@@ -60,56 +61,61 @@ const yearCells = computed(() => {
       @click-year="emit('click-year-header')"
     />
 
-    <template v-if="yearPickerOpen">
-      <div class="drp-year-grid">
-        <CalendarYearCell
-          v-for="cell in yearCells"
-          :key="cell.year"
-          :year="cell.year"
-          :is-current="cell.isCurrent"
-          @click="(y: number) => emit('select-year', y)"
-        />
-      </div>
-    </template>
+    <div class="drp-calendar-body">
+      <template v-if="yearPickerOpen">
+        <div class="drp-year-grid">
+          <CalendarYearCell
+            v-for="cell in yearCells"
+            :key="cell.year"
+            :year="cell.year"
+            :is-current="cell.isCurrent"
+            @click="(y: number) => emit('select-year', y)"
+          />
+        </div>
+      </template>
 
-    <template v-else-if="monthPickerOpen">
-      <div class="drp-month-grid">
-        <CalendarMonthCell
-          v-for="cell in monthCells"
-          :key="cell.month"
-          :month="cell.month"
-          :label="cell.label"
-          :is-current="cell.isCurrent"
-          @click="(m: number) => emit('select-month', m)"
-        />
-      </div>
-    </template>
+      <template v-else-if="monthPickerOpen">
+        <div class="drp-month-grid">
+          <CalendarMonthCell
+            v-for="cell in monthCells"
+            :key="cell.month"
+            :month="cell.month"
+            :label="cell.label"
+            :is-current="cell.isCurrent"
+            @click="(m: number) => emit('select-month', m)"
+          />
+        </div>
+      </template>
 
-    <template v-else>
-      <CalendarWeekdayRow :locale="locale" />
-      <div v-for="(week, wi) in grid" :key="wi" class="drp-week-row">
-        <CalendarDay
-          v-for="(day, di) in week"
-          :key="di"
-          :day="day.dayOfMonth"
-          :is-today="day.isToday"
-          :is-outside-month="day.isOutsideMonth"
-          :is-selected="day.isSelected"
-          :is-range-start="day.isRangeStart"
-          :is-range-end="day.isRangeEnd"
-          :is-in-range="day.isInRange"
-          :is-disabled="day.isDisabled"
-          @click="emit('select-day', day.date)"
-          @drag-start-endpoint="
-            (endpoint: 'start' | 'end') =>
-              emit('drag-start-endpoint', endpoint)
-          "
-          @drag-enter="emit('drag-hover', day.date)"
-          @drop="emit('drop')"
-          @drag-end="emit('drag-end')"
-        />
-      </div>
-    </template>
+      <template v-else>
+        <CalendarWeekdayRow :locale="locale" />
+        <div class="drp-calendar-grid">
+          <div v-for="(week, wi) in grid" :key="wi" class="drp-week-row">
+            <CalendarDay
+              v-for="(day, di) in week"
+              :key="di"
+              :day="day.dayOfMonth"
+              :is-today="day.isToday"
+              :is-outside-month="day.isOutsideMonth"
+              :is-selected="day.isSelected"
+              :is-range-start="day.isRangeStart"
+              :is-range-end="day.isRangeEnd"
+              :is-in-range="day.isInRange"
+              :is-disabled="day.isDisabled"
+              :accepts-drop="acceptsDrop"
+              @click="emit('select-day', day.date)"
+              @drag-start-endpoint="
+                (endpoint: 'start' | 'end') =>
+                  emit('drag-start-endpoint', endpoint)
+              "
+              @drag-enter="emit('drag-hover', day.date)"
+              @drop="emit('drop')"
+              @drag-end="emit('drag-end')"
+            />
+          </div>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -118,6 +124,20 @@ const yearCells = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.drp-calendar-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 260px;
+}
+
+.drp-calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 226px;
 }
 
 .drp-week-row {

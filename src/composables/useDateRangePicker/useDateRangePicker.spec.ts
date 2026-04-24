@@ -576,6 +576,123 @@ describe("useDateRangePicker", () => {
       expect(committedEnd.value?.getDate()).toBe(25);
     });
 
+    describe("drag source side and auto-paging", () => {
+      it("sets dragSourceSide to 'left' when the grabbed boundary is on left calendar", () => {
+        const ctx = setup();
+        ctx.picker.selectDay(new Date(2026, 3, 10)); // left=April, right=May
+        ctx.picker.selectDay(new Date(2026, 3, 20));
+        ctx.picker.startDragEndpoint("start"); // start = April 10 → left
+        expect(ctx.picker.dragSourceSide.value).toBe("left");
+      });
+
+      it("sets dragSourceSide to 'right' when the grabbed boundary is on right calendar", () => {
+        const ctx = setup();
+        ctx.picker.selectDay(new Date(2026, 3, 10)); // left=April, right=May
+        ctx.picker.selectDay(new Date(2026, 4, 15)); // end = May 15
+        ctx.picker.startDragEndpoint("end");
+        expect(ctx.picker.dragSourceSide.value).toBe("right");
+      });
+
+      it("resets dragSourceSide on commit and cancel", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10));
+        picker.selectDay(new Date(2026, 3, 20));
+
+        picker.startDragEndpoint("start");
+        picker.commitDrag();
+        expect(picker.dragSourceSide.value).toBeNull();
+
+        picker.startDragEndpoint("start");
+        picker.cancelDrag();
+        expect(picker.dragSourceSide.value).toBeNull();
+      });
+
+      it("pageSourcePrev on left always advances left back a month", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10));
+        picker.selectDay(new Date(2026, 3, 20));
+        picker.startDragEndpoint("start"); // source=left
+
+        picker.pageSourcePrev();
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 3 });
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 5 });
+      });
+
+      it("pageSourceNext on left is blocked in consecutive state (would collide)", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10)); // left=April, right=May
+        picker.selectDay(new Date(2026, 3, 20));
+        picker.startDragEndpoint("start");
+
+        picker.pageSourceNext();
+        // consecutive April/May → next would make left=May === right, blocked
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 });
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 5 });
+      });
+
+      it("pageSourceNext on left advances when non-consecutive", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10)); // left=April, right=May
+        picker.selectDay(new Date(2026, 3, 20));
+        // Break consecutive: shift right forward
+        picker.selectMonth("right", 7); // right=July
+        picker.startDragEndpoint("start"); // source=left (April)
+
+        picker.pageSourceNext();
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 5 });
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 7 });
+      });
+
+      it("pageSourcePrev on right is blocked in consecutive state", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10)); // left=April, right=May
+        picker.selectDay(new Date(2026, 4, 10)); // end on May → source=right
+        picker.startDragEndpoint("end");
+
+        picker.pageSourcePrev();
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 });
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 5 });
+      });
+
+      it("pageSourcePrev on right advances when non-consecutive", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10));
+        picker.selectDay(new Date(2026, 4, 10)); // end May → source=right
+        picker.selectMonth("left", 2); // left=Feb, right=May
+        picker.startDragEndpoint("end");
+
+        picker.pageSourcePrev();
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 2 });
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 4 });
+      });
+
+      it("pageSourceNext on right always advances right forward", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10));
+        picker.selectDay(new Date(2026, 4, 10)); // end May
+        picker.startDragEndpoint("end");
+
+        picker.pageSourceNext();
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 });
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 6 });
+      });
+
+      it("page methods are no-ops when there is no drag source", () => {
+        const { picker } = setup();
+        picker.selectDay(new Date(2026, 3, 10));
+        picker.selectDay(new Date(2026, 3, 20));
+        // No startDragEndpoint → dragSourceSide is null
+        const leftBefore = { ...picker.leftMonth.value };
+        const rightBefore = { ...picker.rightMonth.value };
+
+        picker.pageSourcePrev();
+        picker.pageSourceNext();
+
+        expect(picker.leftMonth.value).toEqual(leftBefore);
+        expect(picker.rightMonth.value).toEqual(rightBefore);
+      });
+    });
+
     describe("range drag (rigid translation)", () => {
       function setupLongRange() {
         const ctx = setup();

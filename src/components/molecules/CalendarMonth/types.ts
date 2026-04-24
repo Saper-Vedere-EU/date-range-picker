@@ -12,4 +12,6 @@ export interface CalendarMonthProps {
   yearPickerOpen?: boolean;
   /** First year shown in the 12-year picker grid (top-left cell) */
   yearPickerBaseYear?: number;
+  /** When false, day cells reject drag hovers and drops (defaults to true) */
+  acceptsDrop?: boolean;
 }

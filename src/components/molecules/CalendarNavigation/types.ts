@@ -14,4 +14,6 @@ export interface CalendarNavigationProps {
   yearPickerSide?: "left" | "right" | null;
   /** First year shown in the 12-year picker grid (top-left cell) */
   yearPickerBaseYear?: number;
+  /** Side the active drag originated from (null = no drag) */
+  dragSourceSide?: "left" | "right" | null;
 }

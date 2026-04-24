@@ -33,10 +33,13 @@ const {
   selectMonth,
   openYearPicker,
   selectYear,
+  dragSourceSide,
   startDragEndpoint,
   updateDragHover,
   commitDrag,
   cancelDrag,
+  pageSourcePrev,
+  pageSourceNext,
 } = useDateRangePicker({
   committedStart: start,
   committedEnd: end,
@@ -56,6 +59,7 @@ const {
       :month-picker-side="monthPickerSide"
       :year-picker-side="yearPickerSide"
       :year-picker-base-year="yearPickerBaseYear"
+      :drag-source-side="dragSourceSide"
       @prev="navigatePrev"
       @next="navigateNext"
       @select-day="selectDay"
@@ -67,6 +71,8 @@ const {
       @drag-hover="updateDragHover"
       @drag-drop="commitDrag"
       @drag-end="cancelDrag"
+      @auto-page-prev="pageSourcePrev"
+      @auto-page-next="pageSourceNext"
     />
     <ActionBar
       :state="mode"

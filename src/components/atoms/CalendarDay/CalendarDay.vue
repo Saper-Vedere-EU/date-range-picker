@@ -2,7 +2,9 @@
 import { computed, ref, onBeforeUnmount } from "vue";
 import type { CalendarDayProps } from "./types";
 
-const props = defineProps<CalendarDayProps>();
+const props = withDefaults(defineProps<CalendarDayProps>(), {
+  acceptsDrop: true,
+});
 const emit = defineEmits<{
   click: [];
   "drag-start-endpoint": [endpoint: "start" | "end"];
@@ -75,16 +77,25 @@ function handleDragStart(e: DragEvent) {
 }
 
 function handleDragEnter(e: DragEvent) {
+  if (!props.acceptsDrop) {
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+    return;
+  }
   e.preventDefault();
   emit("drag-enter");
 }
 
 function handleDragOver(e: DragEvent) {
+  if (!props.acceptsDrop) {
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+    return;
+  }
   // Required to allow a drop
   e.preventDefault();
 }
 
 function handleDrop(e: DragEvent) {
+  if (!props.acceptsDrop) return;
   e.preventDefault();
   emit("drop");
 }

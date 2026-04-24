@@ -7,4 +7,6 @@ export interface CalendarDayProps {
   isRangeEnd: boolean;
   isInRange: boolean;
   isDisabled: boolean;
+  /** When false, this day rejects drag hovers and drops (defaults to true) */
+  acceptsDrop?: boolean;
 }
