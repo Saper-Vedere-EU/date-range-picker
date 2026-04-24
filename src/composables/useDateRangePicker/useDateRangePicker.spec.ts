@@ -226,6 +226,53 @@ describe("useDateRangePicker", () => {
     });
   });
 
+  describe("navigation snaps back to consecutive months", () => {
+    it("next arrow: left becomes previous right, right advances (idle, non-consecutive)", () => {
+      const { picker } = setup(new Date(2026, 2, 10)); // left=March, right=April
+      picker.selectMonth("right", 10); // left=March, right=October
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 3 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 10 });
+
+      picker.navigateNext();
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 10 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 11 });
+    });
+
+    it("prev arrow: right becomes previous left, left goes back (idle, non-consecutive)", () => {
+      const { picker } = setup(new Date(2026, 2, 10)); // left=March, right=April
+      picker.selectMonth("right", 10); // left=March, right=October
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 3 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 10 });
+
+      picker.navigatePrev();
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 2 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 3 });
+    });
+
+    it("works the same in selected mode (next)", () => {
+      const { picker } = setup();
+      picker.selectDay(new Date(2026, 2, 10));
+      picker.selectDay(new Date(2026, 2, 20));
+      // selected, left=March, right=April
+      picker.selectMonth("right", 10); // left=March, right=October
+
+      picker.navigateNext();
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 10 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 11 });
+    });
+
+    it("works the same in selected mode (prev)", () => {
+      const { picker } = setup();
+      picker.selectDay(new Date(2026, 2, 10));
+      picker.selectDay(new Date(2026, 2, 20));
+      picker.selectMonth("right", 10); // left=March, right=October
+
+      picker.navigatePrev();
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 2 });
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 3 });
+    });
+  });
+
   describe("showViewSelection", () => {
     it("is false in idle and selecting modes", () => {
       const { picker } = setup();

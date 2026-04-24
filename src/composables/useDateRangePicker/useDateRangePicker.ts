@@ -248,8 +248,8 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
       return;
     }
     if (mode.value === "idle" || mode.value === "selected") {
+      rightMonth.value = { ...leftMonth.value };
       leftMonth.value = prevMonth(leftMonth.value);
-      rightMonth.value = prevMonth(rightMonth.value);
     } else if (mode.value === "selecting" && anchor.value) {
       const candidateLeft = prevMonth(leftMonth.value);
       const candidateRight = prevMonth(rightMonth.value);
@@ -279,7 +279,7 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
       return;
     }
     if (mode.value === "idle" || mode.value === "selected") {
-      leftMonth.value = nextMonth(leftMonth.value);
+      leftMonth.value = { ...rightMonth.value };
       rightMonth.value = nextMonth(rightMonth.value);
     } else if (mode.value === "selecting" && anchor.value) {
       const candidateLeft = nextMonth(leftMonth.value);
