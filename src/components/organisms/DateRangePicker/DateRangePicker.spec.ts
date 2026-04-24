@@ -128,6 +128,27 @@ describe('DateRangePicker', () => {
     expect(w.find('.drp-action-btn--secondary').text()).toBe('Cancel')
   })
 
+  it('applies theme prop as inline CSS custom properties on the root', () => {
+    const w = mount(DateRangePicker, {
+      props: {
+        theme: { accent: '#ff0000', bg: '#111', onAccent: '#eee' },
+      },
+    })
+
+    const rootStyle = (w.find('.drp-date-range-picker').element as HTMLElement).style
+    expect(rootStyle.getPropertyValue('--drp-accent')).toBe('#ff0000')
+    expect(rootStyle.getPropertyValue('--drp-bg')).toBe('#111')
+    expect(rootStyle.getPropertyValue('--drp-on-accent')).toBe('#eee')
+    // Unspecified tokens should not be set inline (they fall back to the stylesheet default)
+    expect(rootStyle.getPropertyValue('--drp-text')).toBe('')
+  })
+
+  it('omitting the theme prop leaves inline custom properties unset', () => {
+    const w = mount(DateRangePicker)
+    const rootStyle = (w.find('.drp-date-range-picker').element as HTMLElement).style
+    expect(rootStyle.getPropertyValue('--drp-accent')).toBe('')
+  })
+
   it('clicking a day in selected mode starts new selection', async () => {
     const w = mount(DateRangePicker)
 

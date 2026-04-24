@@ -30,7 +30,7 @@ const weekdays = computed(() => getWeekdayNames(props.locale))
 .drp-weekday {
   font-size: 12px;
   font-weight: 500;
-  color: var(--drp-weekday-color, var(--text, #6b6375));
+  color: var(--drp-muted-text);
   text-transform: capitalize;
   display: flex;
   align-items: center;

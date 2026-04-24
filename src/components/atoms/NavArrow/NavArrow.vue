@@ -25,10 +25,10 @@ defineEmits<{ click: [] }>()
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid var(--drp-border, var(--border, #e5e4e7));
+  border: 1px solid var(--drp-border);
   border-radius: 6px;
   background: transparent;
-  color: var(--drp-text, var(--text-h, #08060d));
+  color: var(--drp-text);
   font-size: 20px;
   cursor: pointer;
   padding: 0;
@@ -38,8 +38,8 @@ defineEmits<{ click: [] }>()
 }
 
 .drp-nav-arrow:hover:not(:disabled) {
-  background: var(--drp-nav-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
-  border-color: var(--drp-accent, var(--accent-border, rgba(170, 59, 255, 0.5)));
+  background: var(--drp-accent-subtle);
+  border-color: var(--drp-accent);
 }
 
 .drp-nav-arrow:disabled {

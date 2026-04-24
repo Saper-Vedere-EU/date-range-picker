@@ -42,16 +42,16 @@ const emit = defineEmits<{
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
-  border: 1px solid var(--drp-border, var(--border, #e5e4e7));
+  border: 1px solid var(--drp-border);
   transition:
     background-color 0.15s,
     border-color 0.15s;
 }
 
 .drp-action-btn--primary {
-  background: var(--drp-accent, var(--accent, #aa3bff));
-  color: #fff;
-  border-color: var(--drp-accent, var(--accent, #aa3bff));
+  background: var(--drp-accent);
+  color: var(--drp-on-accent);
+  border-color: var(--drp-accent);
 }
 
 .drp-action-btn--primary:hover {
@@ -60,20 +60,20 @@ const emit = defineEmits<{
 
 .drp-action-btn--secondary {
   background: transparent;
-  color: var(--drp-text, var(--text-h, #08060d));
+  color: var(--drp-text);
 }
 
 .drp-action-btn--secondary:hover {
-  background: var(--drp-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
+  background: var(--drp-accent-subtle);
 }
 
 .drp-action-btn--tertiary {
   background: transparent;
-  color: var(--drp-accent, var(--accent, #aa3bff));
+  color: var(--drp-accent);
   border-color: transparent;
 }
 
 .drp-action-btn--tertiary:hover {
-  background: var(--drp-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
+  background: var(--drp-accent-subtle);
 }
 </style>

@@ -27,7 +27,7 @@ const emit = defineEmits<{ click: [month: number] }>()
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--drp-day-color, var(--text-h, #08060d));
+  color: var(--drp-text);
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
@@ -37,11 +37,11 @@ const emit = defineEmits<{ click: [month: number] }>()
 }
 
 .drp-month-cell:hover:not(.drp-month-cell--current) {
-  background: var(--drp-day-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
+  background: var(--drp-accent-subtle);
 }
 
 .drp-month-cell--current {
-  background: var(--drp-accent, var(--accent, #aa3bff));
-  color: #fff;
+  background: var(--drp-accent);
+  color: var(--drp-on-accent);
 }
 </style>

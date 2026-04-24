@@ -256,6 +256,6 @@ onBeforeUnmount(clearPageTimer)
 }
 
 .drp-drop-indicator--active {
-  background: var(--drp-accent, var(--accent, #aa3bff));
+  background: var(--drp-accent);
 }
 </style>

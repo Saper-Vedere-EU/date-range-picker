@@ -48,7 +48,7 @@ const monthLabel = computed(() => {
 .drp-month-header__btn {
   font-size: 15px;
   font-weight: 600;
-  color: var(--drp-text, var(--text-h, #08060d));
+  color: var(--drp-text);
   text-align: center;
   padding: 8px 6px;
   background: none;
@@ -60,6 +60,6 @@ const monthLabel = computed(() => {
 }
 
 .drp-month-header__btn:hover {
-  background: var(--drp-day-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
+  background: var(--drp-accent-subtle);
 }
 </style>

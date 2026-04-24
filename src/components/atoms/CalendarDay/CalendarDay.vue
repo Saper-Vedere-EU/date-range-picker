@@ -144,7 +144,7 @@ function handleDragEnd() {
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--drp-day-color, var(--text-h, #08060d));
+  color: var(--drp-text);
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
@@ -166,11 +166,11 @@ function handleDragEnd() {
 .drp-day:hover:not(.drp-day--disabled):not(.drp-day--selected):not(.drp-day--range-start):not(
     .drp-day--range-end
   ) {
-  background: var(--drp-day-hover-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
+  background: var(--drp-accent-subtle);
 }
 
 .drp-day--today {
-  border: 1px solid var(--drp-today-border, var(--accent-border, rgba(170, 59, 255, 0.5)));
+  border: 1px solid var(--drp-accent-border);
 }
 
 .drp-day--outside {
@@ -180,8 +180,8 @@ function handleDragEnd() {
 .drp-day--selected,
 .drp-day--range-start,
 .drp-day--range-end {
-  background: var(--drp-accent, var(--accent, #aa3bff));
-  color: #fff;
+  background: var(--drp-accent);
+  color: var(--drp-on-accent);
 }
 
 .drp-day--range-start {
@@ -197,7 +197,7 @@ function handleDragEnd() {
 }
 
 .drp-day--in-range {
-  background: var(--drp-range-bg, var(--accent-bg, rgba(170, 59, 255, 0.1)));
+  background: var(--drp-accent-subtle);
   border-radius: 0;
 }
 
@@ -207,16 +207,16 @@ function handleDragEnd() {
 }
 
 .drp-day--pressed:not(.drp-day--disabled) {
-  background: var(--drp-day-press-bg, rgba(170, 59, 255, 0.25));
+  background: var(--drp-accent-muted);
 }
 
 .drp-day--pressed.drp-day--in-range {
-  background: var(--drp-range-press-bg, rgba(170, 59, 255, 0.3));
+  background: var(--drp-accent-emphasis);
 }
 
 .drp-day--pressed.drp-day--selected,
 .drp-day--pressed.drp-day--range-start,
 .drp-day--pressed.drp-day--range-end {
-  background: var(--drp-accent-pressed, #8528c7);
+  background: var(--drp-accent-pressed);
 }
 </style>
