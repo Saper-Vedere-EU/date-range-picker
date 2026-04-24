@@ -398,6 +398,87 @@ describe("useDateRangePicker", () => {
     });
   });
 
+  describe("year picker", () => {
+    it("starts with no year picker open", () => {
+      const { picker } = setup();
+      expect(picker.yearPickerSide.value).toBeNull();
+    });
+
+    it("opens year picker for a side and seeds the decade window", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April 2026
+      picker.openYearPicker("left");
+      expect(picker.yearPickerSide.value).toBe("left");
+      // Math.floor(2026 / 12) * 12 = 2016
+      expect(picker.yearPickerBaseYear.value).toBe(2016);
+    });
+
+    it("toggles year picker off when clicking same side", () => {
+      const { picker } = setup();
+      picker.openYearPicker("left");
+      picker.openYearPicker("left");
+      expect(picker.yearPickerSide.value).toBeNull();
+    });
+
+    it("closes month picker when opening year picker", () => {
+      const { picker } = setup();
+      picker.openMonthPicker("left");
+      expect(picker.monthPickerSide.value).toBe("left");
+
+      picker.openYearPicker("left");
+      expect(picker.monthPickerSide.value).toBeNull();
+      expect(picker.yearPickerSide.value).toBe("left");
+    });
+
+    it("closes year picker when opening month picker", () => {
+      const { picker } = setup();
+      picker.openYearPicker("left");
+      expect(picker.yearPickerSide.value).toBe("left");
+
+      picker.openMonthPicker("left");
+      expect(picker.yearPickerSide.value).toBeNull();
+      expect(picker.monthPickerSide.value).toBe("left");
+    });
+
+    it("arrows shift the decade window by 12 years when year picker is open", () => {
+      const { picker } = setup(new Date(2026, 3, 10));
+      picker.openYearPicker("left");
+      expect(picker.yearPickerBaseYear.value).toBe(2016);
+
+      picker.navigateNext();
+      expect(picker.yearPickerBaseYear.value).toBe(2028);
+      // Calendars themselves don't move
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 });
+
+      picker.navigatePrev();
+      picker.navigatePrev();
+      expect(picker.yearPickerBaseYear.value).toBe(2004);
+    });
+
+    it("selectYear updates the year, closes year picker, opens month picker", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April 2026
+      picker.openYearPicker("left");
+      picker.selectYear("left", 2030);
+
+      expect(picker.leftMonth.value).toEqual({ year: 2030, month: 4 });
+      expect(picker.yearPickerSide.value).toBeNull();
+      expect(picker.monthPickerSide.value).toBe("left");
+    });
+
+    it("selectYear on left pushes right when left >= right", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April 2026, right=May 2026
+      picker.selectYear("left", 2027); // left now April 2027, after right
+      expect(picker.leftMonth.value).toEqual({ year: 2027, month: 4 });
+      expect(picker.rightMonth.value).toEqual({ year: 2027, month: 5 });
+    });
+
+    it("selectYear on right pushes left when right <= left", () => {
+      const { picker } = setup(new Date(2026, 3, 10)); // left=April 2026, right=May 2026
+      picker.selectYear("right", 2025); // right now May 2025, before left
+      expect(picker.rightMonth.value).toEqual({ year: 2025, month: 5 });
+      expect(picker.leftMonth.value).toEqual({ year: 2025, month: 4 });
+    });
+  });
+
   describe("edge cases", () => {
     it("handles range spanning year boundary", () => {
       const { picker } = setup();

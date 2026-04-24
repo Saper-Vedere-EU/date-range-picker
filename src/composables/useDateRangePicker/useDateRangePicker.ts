@@ -109,18 +109,35 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     return !startVisible || !endVisible;
   });
 
-  // --- Month picker ---
+  // --- Month / Year pickers ---
 
   const monthPickerSide = ref<"left" | "right" | null>(null);
+  const yearPickerSide = ref<"left" | "right" | null>(null);
+  const yearPickerBaseYear = ref<number>(
+    Math.floor(initialYm.year / 12) * 12,
+  );
 
   function openMonthPicker(side: "left" | "right") {
-    monthPickerSide.value = monthPickerSide.value === side ? null : side;
+    if (monthPickerSide.value === side) {
+      monthPickerSide.value = null;
+      return;
+    }
+    yearPickerSide.value = null;
+    monthPickerSide.value = side;
   }
 
-  function selectMonth(side: "left" | "right", month: number) {
+  function openYearPicker(side: "left" | "right") {
+    if (yearPickerSide.value === side) {
+      yearPickerSide.value = null;
+      return;
+    }
+    monthPickerSide.value = null;
     const current = side === "left" ? leftMonth.value : rightMonth.value;
-    const newYm: YearMonth = { year: current.year, month };
+    yearPickerBaseYear.value = Math.floor(current.year / 12) * 12;
+    yearPickerSide.value = side;
+  }
 
+  function applyYearMonth(side: "left" | "right", newYm: YearMonth) {
     if (side === "left") {
       leftMonth.value = { ...newYm };
       if (compareYearMonth(newYm, rightMonth.value) >= 0) {
@@ -132,8 +149,19 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
         leftMonth.value = prevMonth(newYm);
       }
     }
+  }
 
+  function selectMonth(side: "left" | "right", month: number) {
+    const current = side === "left" ? leftMonth.value : rightMonth.value;
+    applyYearMonth(side, { year: current.year, month });
     monthPickerSide.value = null;
+  }
+
+  function selectYear(side: "left" | "right", year: number) {
+    const current = side === "left" ? leftMonth.value : rightMonth.value;
+    applyYearMonth(side, { year, month: current.month });
+    yearPickerSide.value = null;
+    monthPickerSide.value = side;
   }
 
   // --- Actions ---
@@ -163,6 +191,10 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   }
 
   function navigatePrev() {
+    if (yearPickerSide.value !== null) {
+      yearPickerBaseYear.value -= 12;
+      return;
+    }
     if (mode.value === "idle" || mode.value === "selected") {
       leftMonth.value = prevMonth(leftMonth.value);
       rightMonth.value = prevMonth(rightMonth.value);
@@ -190,6 +222,10 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   }
 
   function navigateNext() {
+    if (yearPickerSide.value !== null) {
+      yearPickerBaseYear.value += 12;
+      return;
+    }
     if (mode.value === "idle" || mode.value === "selected") {
       leftMonth.value = nextMonth(leftMonth.value);
       rightMonth.value = nextMonth(rightMonth.value);
@@ -261,6 +297,8 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     rightGrid,
     showViewSelection,
     monthPickerSide: computed(() => monthPickerSide.value),
+    yearPickerSide: computed(() => yearPickerSide.value),
+    yearPickerBaseYear: computed(() => yearPickerBaseYear.value),
     selectDay,
     navigatePrev,
     navigateNext,
@@ -269,5 +307,7 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     viewSelection,
     openMonthPicker,
     selectMonth,
+    openYearPicker,
+    selectYear,
   };
 }

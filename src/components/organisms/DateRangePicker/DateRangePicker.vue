@@ -21,6 +21,8 @@ const {
   rightGrid,
   showViewSelection,
   monthPickerSide,
+  yearPickerSide,
+  yearPickerBaseYear,
   selectDay,
   navigatePrev,
   navigateNext,
@@ -29,6 +31,8 @@ const {
   viewSelection,
   openMonthPicker,
   selectMonth,
+  openYearPicker,
+  selectYear,
 } = useDateRangePicker({
   committedStart: start,
   committedEnd: end,
@@ -46,11 +50,15 @@ const {
       :right-grid="rightGrid"
       :locale="locale"
       :month-picker-side="monthPickerSide"
+      :year-picker-side="yearPickerSide"
+      :year-picker-base-year="yearPickerBaseYear"
       @prev="navigatePrev"
       @next="navigateNext"
       @select-day="selectDay"
       @click-month-header="openMonthPicker"
+      @click-year-header="openYearPicker"
       @select-month="selectMonth"
+      @select-year="selectYear"
     />
     <ActionBar
       :state="mode"

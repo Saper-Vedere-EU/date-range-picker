@@ -7,37 +7,59 @@ const props = withDefaults(defineProps<CalendarMonthHeaderProps>(), {
   locale: "fr-FR",
 });
 
-const emit = defineEmits<{ click: [] }>();
+const emit = defineEmits<{
+  "click-month": [];
+  "click-year": [];
+}>();
 
-const label = computed(() => {
+const monthLabel = computed(() => {
   const name = getMonthName(props.month, props.locale);
-  return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${props.year}`;
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
 });
 </script>
 
 <template>
-  <button type="button" class="drp-month-header" @click="emit('click')">
-    {{ label }}
-  </button>
+  <div class="drp-month-header">
+    <button
+      type="button"
+      class="drp-month-header__btn drp-month-header__btn--month"
+      @click="emit('click-month')"
+    >
+      {{ monthLabel }}
+    </button>
+    <button
+      type="button"
+      class="drp-month-header__btn drp-month-header__btn--year"
+      @click="emit('click-year')"
+    >
+      {{ year }}
+    </button>
+  </div>
 </template>
 
 <style scoped>
 .drp-month-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.drp-month-header__btn {
   font-size: 15px;
   font-weight: 600;
   color: var(--drp-text, var(--text-h, #08060d));
   text-align: center;
-  padding: 8px 0;
+  padding: 8px 6px;
   background: none;
   border: none;
   font-family: inherit;
   cursor: pointer;
   border-radius: 6px;
   transition: background-color 0.15s;
-  width: 100%;
 }
 
-.drp-month-header:hover {
+.drp-month-header__btn:hover {
   background: var(
     --drp-day-hover-bg,
     var(--accent-bg, rgba(170, 59, 255, 0.1))

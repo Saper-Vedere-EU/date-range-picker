@@ -60,12 +60,20 @@ describe("CalendarMonth", () => {
     expect(w.emitted("select-day")![0][0]).toBeInstanceOf(Date);
   });
 
-  it("emits click-header when month header is clicked", async () => {
+  it("emits click-month-header when month button is clicked", async () => {
     const w = mount(CalendarMonth, {
       props: { year: 2026, month: 4, grid },
     });
-    await w.find(".drp-month-header").trigger("click");
-    expect(w.emitted("click-header")).toHaveLength(1);
+    await w.find(".drp-month-header__btn--month").trigger("click");
+    expect(w.emitted("click-month-header")).toHaveLength(1);
+  });
+
+  it("emits click-year-header when year button is clicked", async () => {
+    const w = mount(CalendarMonth, {
+      props: { year: 2026, month: 4, grid },
+    });
+    await w.find(".drp-month-header__btn--year").trigger("click");
+    expect(w.emitted("click-year-header")).toHaveLength(1);
   });
 
   describe("month picker", () => {
@@ -109,6 +117,97 @@ describe("CalendarMonth", () => {
       await cells[6].trigger("click"); // July (index 6 = month 7)
       expect(w.emitted("select-month")).toHaveLength(1);
       expect(w.emitted("select-month")![0]).toEqual([7]);
+    });
+  });
+
+  describe("year picker", () => {
+    it("shows year grid when yearPickerOpen is true", () => {
+      const w = mount(CalendarMonth, {
+        props: {
+          year: 2026,
+          month: 4,
+          grid,
+          yearPickerOpen: true,
+          yearPickerBaseYear: 2016,
+        },
+      });
+      expect(w.find(".drp-year-grid").exists()).toBe(true);
+      expect(w.findAll(".drp-year-cell")).toHaveLength(12);
+    });
+
+    it("hides day grid when yearPickerOpen is true", () => {
+      const w = mount(CalendarMonth, {
+        props: {
+          year: 2026,
+          month: 4,
+          grid,
+          yearPickerOpen: true,
+          yearPickerBaseYear: 2016,
+        },
+      });
+      expect(w.findAll(".drp-week-row")).toHaveLength(0);
+      expect(w.findAll(".drp-weekday")).toHaveLength(0);
+    });
+
+    it("renders 12 consecutive years starting from yearPickerBaseYear", () => {
+      const w = mount(CalendarMonth, {
+        props: {
+          year: 2026,
+          month: 4,
+          grid,
+          yearPickerOpen: true,
+          yearPickerBaseYear: 2016,
+        },
+      });
+      const cells = w.findAll(".drp-year-cell");
+      expect(cells[0].text()).toBe("2016");
+      expect(cells[11].text()).toBe("2027");
+    });
+
+    it("marks the current year in the grid", () => {
+      const w = mount(CalendarMonth, {
+        props: {
+          year: 2026,
+          month: 4,
+          grid,
+          yearPickerOpen: true,
+          yearPickerBaseYear: 2016,
+        },
+      });
+      const currentCells = w.findAll(".drp-year-cell--current");
+      expect(currentCells).toHaveLength(1);
+      expect(currentCells[0].text()).toBe("2026");
+    });
+
+    it("emits select-year when a year cell is clicked", async () => {
+      const w = mount(CalendarMonth, {
+        props: {
+          year: 2026,
+          month: 4,
+          grid,
+          yearPickerOpen: true,
+          yearPickerBaseYear: 2016,
+        },
+      });
+      const cells = w.findAll(".drp-year-cell");
+      await cells[3].trigger("click"); // 2019
+      expect(w.emitted("select-year")).toHaveLength(1);
+      expect(w.emitted("select-year")![0]).toEqual([2019]);
+    });
+
+    it("hides month picker when year picker is open (year picker wins)", () => {
+      const w = mount(CalendarMonth, {
+        props: {
+          year: 2026,
+          month: 4,
+          grid,
+          monthPickerOpen: true,
+          yearPickerOpen: true,
+          yearPickerBaseYear: 2016,
+        },
+      });
+      expect(w.find(".drp-year-grid").exists()).toBe(true);
+      expect(w.find(".drp-month-grid").exists()).toBe(false);
     });
   });
 });

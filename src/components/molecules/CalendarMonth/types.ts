@@ -8,4 +8,8 @@ export interface CalendarMonthProps {
   locale?: string;
   /** Whether the month picker grid is currently shown */
   monthPickerOpen?: boolean;
+  /** Whether the year picker grid is currently shown */
+  yearPickerOpen?: boolean;
+  /** First year shown in the 12-year picker grid (top-left cell) */
+  yearPickerBaseYear?: number;
 }

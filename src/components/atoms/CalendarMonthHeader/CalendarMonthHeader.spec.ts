@@ -19,26 +19,36 @@ describe("CalendarMonthHeader", () => {
     expect(w.text()).toContain("2026");
   });
 
-  it("capitalizes the first letter", () => {
+  it("capitalizes the first letter of the month name", () => {
     const w = mount(CalendarMonthHeader, {
       props: { year: 2026, month: 1 },
     });
-    const text = w.text();
-    expect(text[0]).toBe(text[0].toUpperCase());
+    const monthText = w.find(".drp-month-header__btn--month").text();
+    expect(monthText[0]).toBe(monthText[0].toUpperCase());
   });
 
-  it("emits click when clicked", async () => {
+  it("emits click-month when the month button is clicked", async () => {
     const w = mount(CalendarMonthHeader, {
       props: { year: 2026, month: 4 },
     });
-    await w.find("button").trigger("click");
-    expect(w.emitted("click")).toHaveLength(1);
+    await w.find(".drp-month-header__btn--month").trigger("click");
+    expect(w.emitted("click-month")).toHaveLength(1);
+    expect(w.emitted("click-year")).toBeUndefined();
   });
 
-  it("renders as a button element", () => {
+  it("emits click-year when the year button is clicked", async () => {
     const w = mount(CalendarMonthHeader, {
       props: { year: 2026, month: 4 },
     });
-    expect(w.find("button").exists()).toBe(true);
+    await w.find(".drp-month-header__btn--year").trigger("click");
+    expect(w.emitted("click-year")).toHaveLength(1);
+    expect(w.emitted("click-month")).toBeUndefined();
+  });
+
+  it("renders month and year as separate buttons", () => {
+    const w = mount(CalendarMonthHeader, {
+      props: { year: 2026, month: 4 },
+    });
+    expect(w.findAll("button")).toHaveLength(2);
   });
 });

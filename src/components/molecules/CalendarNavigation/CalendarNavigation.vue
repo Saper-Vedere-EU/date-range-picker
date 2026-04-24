@@ -6,6 +6,7 @@ import { CalendarMonth } from "@/components/molecules/CalendarMonth";
 withDefaults(defineProps<CalendarNavigationProps>(), {
   locale: "fr-FR",
   monthPickerSide: null,
+  yearPickerSide: null,
 });
 
 const emit = defineEmits<{
@@ -13,7 +14,9 @@ const emit = defineEmits<{
   next: [];
   "select-day": [date: Date];
   "click-month-header": [side: "left" | "right"];
+  "click-year-header": [side: "left" | "right"];
   "select-month": [side: "left" | "right", month: number];
+  "select-year": [side: "left" | "right", year: number];
 }>();
 </script>
 
@@ -26,9 +29,13 @@ const emit = defineEmits<{
       :grid="leftGrid"
       :locale="locale"
       :month-picker-open="monthPickerSide === 'left'"
-      @select-day="(date) => emit('select-day', date)"
-      @click-header="emit('click-month-header', 'left')"
-      @select-month="(m) => emit('select-month', 'left', m)"
+      :year-picker-open="yearPickerSide === 'left'"
+      :year-picker-base-year="yearPickerBaseYear"
+      @select-day="(date: Date) => emit('select-day', date)"
+      @click-month-header="emit('click-month-header', 'left')"
+      @click-year-header="emit('click-year-header', 'left')"
+      @select-month="(m: number) => emit('select-month', 'left', m)"
+      @select-year="(y: number) => emit('select-year', 'left', y)"
     />
     <CalendarMonth
       :year="rightYear"
@@ -36,9 +43,13 @@ const emit = defineEmits<{
       :grid="rightGrid"
       :locale="locale"
       :month-picker-open="monthPickerSide === 'right'"
-      @select-day="(date) => emit('select-day', date)"
-      @click-header="emit('click-month-header', 'right')"
-      @select-month="(m) => emit('select-month', 'right', m)"
+      :year-picker-open="yearPickerSide === 'right'"
+      :year-picker-base-year="yearPickerBaseYear"
+      @select-day="(date: Date) => emit('select-day', date)"
+      @click-month-header="emit('click-month-header', 'right')"
+      @click-year-header="emit('click-year-header', 'right')"
+      @select-month="(m: number) => emit('select-month', 'right', m)"
+      @select-year="(y: number) => emit('select-year', 'right', y)"
     />
     <NavArrow direction="right" @click="emit('next')" />
   </div>

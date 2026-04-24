@@ -5,17 +5,21 @@ import { CalendarMonthHeader } from "@/components/atoms/CalendarMonthHeader";
 import { CalendarWeekdayRow } from "@/components/atoms/CalendarWeekdayRow";
 import { CalendarDay } from "@/components/atoms/CalendarDay";
 import { CalendarMonthCell } from "@/components/atoms/CalendarMonthCell";
+import { CalendarYearCell } from "@/components/atoms/CalendarYearCell";
 import { getMonthShortName } from "@/composables/useDateRangePicker/calendar-utils";
 
 const props = withDefaults(defineProps<CalendarMonthProps>(), {
   locale: "fr-FR",
   monthPickerOpen: false,
+  yearPickerOpen: false,
 });
 
 const emit = defineEmits<{
   "select-day": [date: Date];
   "select-month": [month: number];
-  "click-header": [];
+  "select-year": [year: number];
+  "click-month-header": [];
+  "click-year-header": [];
 }>();
 
 const monthCells = computed(() => {
@@ -30,6 +34,16 @@ const monthCells = computed(() => {
   }
   return cells;
 });
+
+const yearCells = computed(() => {
+  const base = props.yearPickerBaseYear ?? props.year;
+  const cells: { year: number; isCurrent: boolean }[] = [];
+  for (let i = 0; i < 12; i++) {
+    const y = base + i;
+    cells.push({ year: y, isCurrent: y === props.year });
+  }
+  return cells;
+});
 </script>
 
 <template>
@@ -38,10 +52,23 @@ const monthCells = computed(() => {
       :year="year"
       :month="month"
       :locale="locale"
-      @click="emit('click-header')"
+      @click-month="emit('click-month-header')"
+      @click-year="emit('click-year-header')"
     />
 
-    <template v-if="monthPickerOpen">
+    <template v-if="yearPickerOpen">
+      <div class="drp-year-grid">
+        <CalendarYearCell
+          v-for="cell in yearCells"
+          :key="cell.year"
+          :year="cell.year"
+          :is-current="cell.isCurrent"
+          @click="(y: number) => emit('select-year', y)"
+        />
+      </div>
+    </template>
+
+    <template v-else-if="monthPickerOpen">
       <div class="drp-month-grid">
         <CalendarMonthCell
           v-for="cell in monthCells"
@@ -88,7 +115,8 @@ const monthCells = computed(() => {
   gap: 2px;
 }
 
-.drp-month-grid {
+.drp-month-grid,
+.drp-year-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(4, 1fr);

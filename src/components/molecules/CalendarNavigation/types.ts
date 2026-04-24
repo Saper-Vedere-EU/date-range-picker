@@ -10,4 +10,8 @@ export interface CalendarNavigationProps {
   locale?: string;
   /** Which side has the month picker open (null = none) */
   monthPickerSide?: "left" | "right" | null;
+  /** Which side has the year picker open (null = none) */
+  yearPickerSide?: "left" | "right" | null;
+  /** First year shown in the 12-year picker grid (top-left cell) */
+  yearPickerBaseYear?: number;
 }
