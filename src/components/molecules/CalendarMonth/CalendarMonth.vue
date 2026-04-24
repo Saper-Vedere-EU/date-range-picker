@@ -20,6 +20,10 @@ const emit = defineEmits<{
   "select-year": [year: number];
   "click-month-header": [];
   "click-year-header": [];
+  "drag-start-endpoint": [endpoint: "start" | "end"];
+  "drag-hover": [date: Date];
+  drop: [];
+  "drag-end": [];
 }>();
 
 const monthCells = computed(() => {
@@ -96,6 +100,13 @@ const yearCells = computed(() => {
           :is-in-range="day.isInRange"
           :is-disabled="day.isDisabled"
           @click="emit('select-day', day.date)"
+          @drag-start-endpoint="
+            (endpoint: 'start' | 'end') =>
+              emit('drag-start-endpoint', endpoint)
+          "
+          @drag-enter="emit('drag-hover', day.date)"
+          @drop="emit('drop')"
+          @drag-end="emit('drag-end')"
         />
       </div>
     </template>

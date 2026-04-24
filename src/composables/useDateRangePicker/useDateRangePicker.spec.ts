@@ -479,6 +479,195 @@ describe("useDateRangePicker", () => {
     });
   });
 
+  describe("drag to adjust endpoint", () => {
+    function setupSelected() {
+      const ctx = setup();
+      ctx.picker.selectDay(new Date(2026, 3, 10)); // April 10
+      ctx.picker.selectDay(new Date(2026, 3, 20)); // April 20
+      return ctx;
+    }
+
+    function currentRange(picker: ReturnType<typeof useDateRangePicker>) {
+      const days = [
+        ...picker.leftGrid.value.flat(),
+        ...picker.rightGrid.value.flat(),
+      ];
+      const rs = days.find((d) => d.isRangeStart && !d.isOutsideMonth);
+      const re = days.find((d) => d.isRangeEnd && !d.isOutsideMonth);
+      return { start: rs?.dayOfMonth, end: re?.dayOfMonth };
+    }
+
+    it("is inactive outside selected mode", () => {
+      const { picker } = setup();
+      picker.startDragEndpoint("start");
+      expect(picker.draggingKind.value).toBeNull();
+
+      picker.selectDay(new Date(2026, 3, 10)); // selecting
+      picker.startDragEndpoint("start");
+      expect(picker.draggingKind.value).toBeNull();
+    });
+
+    it("activates drag in selected mode", () => {
+      const { picker } = setupSelected();
+      picker.startDragEndpoint("start");
+      expect(picker.draggingKind.value).toBe("start");
+    });
+
+    it("updates range preview live on hover", () => {
+      const { picker } = setupSelected();
+      expect(currentRange(picker)).toEqual({ start: 10, end: 20 });
+
+      picker.startDragEndpoint("start");
+      picker.updateDragHover(new Date(2026, 3, 5)); // move start to 5
+      expect(currentRange(picker)).toEqual({ start: 5, end: 20 });
+    });
+
+    it("keeps the other endpoint fixed while dragging", () => {
+      const { picker } = setupSelected();
+      picker.startDragEndpoint("end");
+      picker.updateDragHover(new Date(2026, 3, 25));
+      expect(currentRange(picker)).toEqual({ start: 10, end: 25 });
+    });
+
+    it("swaps endpoints when drag crosses the other boundary", () => {
+      const { picker } = setupSelected();
+      picker.startDragEndpoint("start");
+      // Drag start past the end date
+      picker.updateDragHover(new Date(2026, 3, 25));
+      expect(currentRange(picker)).toEqual({ start: 20, end: 25 });
+    });
+
+    it("commits the previewed range on drop", () => {
+      const { picker } = setupSelected();
+      picker.startDragEndpoint("end");
+      picker.updateDragHover(new Date(2026, 3, 15));
+      picker.commitDrag();
+
+      expect(currentRange(picker)).toEqual({ start: 10, end: 15 });
+      expect(picker.draggingKind.value).toBeNull();
+    });
+
+    it("cancelDrag reverts the preview to the last committed range", () => {
+      const { picker } = setupSelected();
+      picker.startDragEndpoint("start");
+      picker.updateDragHover(new Date(2026, 3, 1));
+      expect(currentRange(picker)).toEqual({ start: 1, end: 20 });
+
+      picker.cancelDrag();
+      expect(currentRange(picker)).toEqual({ start: 10, end: 20 });
+      expect(picker.draggingKind.value).toBeNull();
+    });
+
+    it("cancelDrag without hover is a no-op on the range", () => {
+      const { picker } = setupSelected();
+      picker.startDragEndpoint("start");
+      picker.cancelDrag();
+      expect(currentRange(picker)).toEqual({ start: 10, end: 20 });
+    });
+
+    it("commit after drag persists the adjusted range", () => {
+      const { picker, committedStart, committedEnd } = setupSelected();
+      picker.startDragEndpoint("end");
+      picker.updateDragHover(new Date(2026, 3, 25));
+      picker.commitDrag();
+      picker.commit();
+
+      expect(committedStart.value?.getDate()).toBe(10);
+      expect(committedEnd.value?.getDate()).toBe(25);
+    });
+
+    describe("range drag (rigid translation)", () => {
+      function setupLongRange() {
+        const ctx = setup();
+        ctx.picker.selectDay(new Date(2026, 2, 15)); // March 15
+        ctx.picker.selectDay(new Date(2026, 3, 15)); // April 15
+        return ctx;
+      }
+
+      it("activates range drag when grabbing an in-range day", () => {
+        const { picker } = setupLongRange();
+        picker.startDragRange(new Date(2026, 2, 26)); // March 26 (in range)
+        expect(picker.draggingKind.value).toBe("range");
+      });
+
+      it("ignores startDragRange when the grab date is outside the range", () => {
+        const { picker } = setupLongRange();
+        picker.startDragRange(new Date(2026, 4, 5)); // May 5, after end
+        expect(picker.draggingKind.value).toBeNull();
+      });
+
+      it("ignores startDragRange outside selected mode", () => {
+        const { picker } = setup();
+        picker.startDragRange(new Date(2026, 2, 26));
+        expect(picker.draggingKind.value).toBeNull();
+      });
+
+      it("translates both endpoints by the hover delta", () => {
+        const { picker } = setupLongRange(); // March 15 → April 15
+        picker.startDragRange(new Date(2026, 2, 26)); // grab March 26
+        picker.updateDragHover(new Date(2026, 3, 5)); // drop target April 5 → +10 days
+
+        // left calendar = March, right = April
+        const left = picker.leftGrid.value.flat();
+        const right = picker.rightGrid.value.flat();
+        const rsLeft = left.find(
+          (d) => d.isRangeStart && !d.isOutsideMonth,
+        );
+        const reRight = right.find((d) => d.isRangeEnd && !d.isOutsideMonth);
+        // new start = March 15 + 10 = March 25
+        expect(rsLeft?.dayOfMonth).toBe(25);
+        // new end = April 15 + 10 = April 25
+        expect(reRight?.dayOfMonth).toBe(25);
+      });
+
+      it("translates backward with a negative delta", () => {
+        const { picker } = setupLongRange();
+        picker.startDragRange(new Date(2026, 2, 26)); // March 26
+        picker.updateDragHover(new Date(2026, 2, 20)); // March 20 → -6 days
+
+        const left = picker.leftGrid.value.flat();
+        const right = picker.rightGrid.value.flat();
+        const rsLeft = left.find(
+          (d) => d.isRangeStart && !d.isOutsideMonth,
+        );
+        const reRight = right.find((d) => d.isRangeEnd && !d.isOutsideMonth);
+        // start = March 9, end = April 9
+        expect(rsLeft?.dayOfMonth).toBe(9);
+        expect(reRight?.dayOfMonth).toBe(9);
+      });
+
+      it("commits the translated range on drop", () => {
+        const { picker } = setupLongRange();
+        picker.startDragRange(new Date(2026, 2, 26));
+        picker.updateDragHover(new Date(2026, 3, 5)); // +10 days
+        picker.commitDrag();
+
+        const left = picker.leftGrid.value.flat();
+        const right = picker.rightGrid.value.flat();
+        expect(
+          left.find((d) => d.isRangeStart && !d.isOutsideMonth)?.dayOfMonth,
+        ).toBe(25);
+        expect(
+          right.find((d) => d.isRangeEnd && !d.isOutsideMonth)?.dayOfMonth,
+        ).toBe(25);
+        expect(picker.draggingKind.value).toBeNull();
+      });
+
+      it("cancelDrag reverts to the committed range", () => {
+        const { picker } = setupLongRange();
+        picker.startDragRange(new Date(2026, 2, 26));
+        picker.updateDragHover(new Date(2026, 3, 5));
+        picker.cancelDrag();
+
+        const left = picker.leftGrid.value.flat();
+        expect(
+          left.find((d) => d.isRangeStart && !d.isOutsideMonth)?.dayOfMonth,
+        ).toBe(15);
+        expect(picker.draggingKind.value).toBeNull();
+      });
+    });
+  });
+
   describe("edge cases", () => {
     it("handles range spanning year boundary", () => {
       const { picker } = setup();

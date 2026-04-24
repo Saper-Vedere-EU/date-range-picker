@@ -38,10 +38,56 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   const committedStartSnapshot = ref<Date | undefined>(undefined);
   const committedEndSnapshot = ref<Date | undefined>(undefined);
 
+  // drag state (active only in "selected" mode)
+  const draggingKind = ref<"start" | "end" | "range" | null>(null);
+  const dragHoverDate = ref<Date | null>(null);
+  /** For "range" kind: the in-range day the user originally grabbed */
+  const dragAnchorDate = ref<Date | null>(null);
+
   // --- Range computation ---
 
+  function shiftByDays(date: Date, days: number): Date {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+
+  function previewRange(): [Date, Date] | null {
+    if (!draggingKind.value || !dragHoverDate.value) return null;
+
+    if (draggingKind.value === "range") {
+      if (
+        !dragAnchorDate.value ||
+        !tentativeStart.value ||
+        !tentativeEnd.value
+      ) {
+        return null;
+      }
+      const daysDelta = Math.round(
+        (dragHoverDate.value.getTime() - dragAnchorDate.value.getTime()) /
+          86400000,
+      );
+      if (daysDelta === 0) return null;
+      return [
+        shiftByDays(tentativeStart.value, daysDelta),
+        shiftByDays(tentativeEnd.value, daysDelta),
+      ];
+    }
+
+    const other =
+      draggingKind.value === "start"
+        ? tentativeEnd.value
+        : tentativeStart.value;
+    if (!other) return null;
+    return orderDates(dragHoverDate.value, other);
+  }
+
   const rangeStart = computed<Date | null>(() => {
-    if (mode.value === "selected") return tentativeStart.value;
+    if (mode.value === "selected") {
+      const preview = previewRange();
+      if (preview) return preview[0];
+      return tentativeStart.value;
+    }
     if (mode.value === "idle" && committedStart.value && committedEnd.value) {
       return committedStart.value;
     }
@@ -49,7 +95,11 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   });
 
   const rangeEnd = computed<Date | null>(() => {
-    if (mode.value === "selected") return tentativeEnd.value;
+    if (mode.value === "selected") {
+      const preview = previewRange();
+      if (preview) return preview[1];
+      return tentativeEnd.value;
+    }
     if (mode.value === "idle" && committedStart.value && committedEnd.value) {
       return committedEnd.value;
     }
@@ -270,6 +320,53 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     mode.value = "idle";
   }
 
+  // --- Drag to adjust (selected mode only) ---
+
+  function startDragEndpoint(endpoint: "start" | "end") {
+    if (mode.value !== "selected") return;
+    draggingKind.value = endpoint;
+    dragHoverDate.value = null;
+    dragAnchorDate.value = null;
+  }
+
+  function startDragRange(grabDate: Date) {
+    if (mode.value !== "selected") return;
+    if (!tentativeStart.value || !tentativeEnd.value) return;
+    const t = grabDate.getTime();
+    if (
+      t < tentativeStart.value.getTime() ||
+      t > tentativeEnd.value.getTime()
+    ) {
+      return;
+    }
+    draggingKind.value = "range";
+    dragAnchorDate.value = grabDate;
+    dragHoverDate.value = null;
+  }
+
+  function updateDragHover(date: Date) {
+    if (draggingKind.value === null) return;
+    dragHoverDate.value = date;
+  }
+
+  function commitDrag() {
+    if (draggingKind.value === null) return;
+    const preview = previewRange();
+    if (preview) {
+      tentativeStart.value = preview[0];
+      tentativeEnd.value = preview[1];
+    }
+    draggingKind.value = null;
+    dragHoverDate.value = null;
+    dragAnchorDate.value = null;
+  }
+
+  function cancelDrag() {
+    draggingKind.value = null;
+    dragHoverDate.value = null;
+    dragAnchorDate.value = null;
+  }
+
   function viewSelection() {
     if (mode.value !== "selected") return;
     const ts = tentativeStart.value;
@@ -309,5 +406,11 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     selectMonth,
     openYearPicker,
     selectYear,
+    draggingKind: computed(() => draggingKind.value),
+    startDragEndpoint,
+    startDragRange,
+    updateDragHover,
+    commitDrag,
+    cancelDrag,
   };
 }

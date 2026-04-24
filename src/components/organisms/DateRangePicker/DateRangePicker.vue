@@ -33,6 +33,10 @@ const {
   selectMonth,
   openYearPicker,
   selectYear,
+  startDragEndpoint,
+  updateDragHover,
+  commitDrag,
+  cancelDrag,
 } = useDateRangePicker({
   committedStart: start,
   committedEnd: end,
@@ -59,6 +63,10 @@ const {
       @click-year-header="openYearPicker"
       @select-month="selectMonth"
       @select-year="selectYear"
+      @drag-start-endpoint="startDragEndpoint"
+      @drag-hover="updateDragHover"
+      @drag-drop="commitDrag"
+      @drag-end="cancelDrag"
     />
     <ActionBar
       :state="mode"

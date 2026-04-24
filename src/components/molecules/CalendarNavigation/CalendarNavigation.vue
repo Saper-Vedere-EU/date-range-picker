@@ -17,6 +17,10 @@ const emit = defineEmits<{
   "click-year-header": [side: "left" | "right"];
   "select-month": [side: "left" | "right", month: number];
   "select-year": [side: "left" | "right", year: number];
+  "drag-start-endpoint": [endpoint: "start" | "end"];
+  "drag-hover": [date: Date];
+  "drag-drop": [];
+  "drag-end": [];
 }>();
 </script>
 
@@ -36,6 +40,12 @@ const emit = defineEmits<{
       @click-year-header="emit('click-year-header', 'left')"
       @select-month="(m: number) => emit('select-month', 'left', m)"
       @select-year="(y: number) => emit('select-year', 'left', y)"
+      @drag-start-endpoint="
+        (endpoint: 'start' | 'end') => emit('drag-start-endpoint', endpoint)
+      "
+      @drag-hover="(d: Date) => emit('drag-hover', d)"
+      @drop="emit('drag-drop')"
+      @drag-end="emit('drag-end')"
     />
     <CalendarMonth
       :year="rightYear"
@@ -50,6 +60,12 @@ const emit = defineEmits<{
       @click-year-header="emit('click-year-header', 'right')"
       @select-month="(m: number) => emit('select-month', 'right', m)"
       @select-year="(y: number) => emit('select-year', 'right', y)"
+      @drag-start-endpoint="
+        (endpoint: 'start' | 'end') => emit('drag-start-endpoint', endpoint)
+      "
+      @drag-hover="(d: Date) => emit('drag-hover', d)"
+      @drop="emit('drag-drop')"
+      @drag-end="emit('drag-end')"
     />
     <NavArrow direction="right" @click="emit('next')" />
   </div>
