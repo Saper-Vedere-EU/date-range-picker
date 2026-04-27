@@ -133,12 +133,18 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   // --- "Voir la sélection" ---
 
   const showViewSelection = computed<boolean>(() => {
-    if (mode.value !== 'selected') return false
-    const ts = tentativeStart.value
-    const te = tentativeEnd.value
-    if (!ts || !te) return false
-    const startVisible = isSameMonth(ts, leftMonth.value) || isSameMonth(ts, rightMonth.value)
-    const endVisible = isSameMonth(te, leftMonth.value) || isSameMonth(te, rightMonth.value)
+    let start: Date | null = null
+    let end: Date | null = null
+    if (mode.value === 'selected') {
+      start = tentativeStart.value
+      end = tentativeEnd.value
+    } else if (mode.value === 'idle') {
+      start = committedStart.value ?? null
+      end = committedEnd.value ?? null
+    }
+    if (!start || !end) return false
+    const startVisible = isSameMonth(start, leftMonth.value) || isSameMonth(start, rightMonth.value)
+    const endVisible = isSameMonth(end, leftMonth.value) || isSameMonth(end, rightMonth.value)
     return !startVisible || !endVisible
   })
 
@@ -379,13 +385,19 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   }
 
   function viewSelection() {
-    if (mode.value !== 'selected') return
-    const ts = tentativeStart.value
-    const te = tentativeEnd.value
-    if (!ts || !te) return
+    let start: Date | null = null
+    let end: Date | null = null
+    if (mode.value === 'selected') {
+      start = tentativeStart.value
+      end = tentativeEnd.value
+    } else if (mode.value === 'idle') {
+      start = committedStart.value ?? null
+      end = committedEnd.value ?? null
+    }
+    if (!start || !end) return
 
-    const startYm = yearMonthFromDate(ts)
-    const endYm = yearMonthFromDate(te)
+    const startYm = yearMonthFromDate(start)
+    const endYm = yearMonthFromDate(end)
 
     if (startYm.year === endYm.year && startYm.month === endYm.month) {
       // Same month: left = that month, right = next

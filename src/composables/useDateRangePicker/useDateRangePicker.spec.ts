@@ -271,10 +271,13 @@ describe('useDateRangePicker', () => {
   })
 
   describe('showViewSelection', () => {
-    it('is false in idle and selecting modes', () => {
+    it('is false in idle mode without a committed range', () => {
       const { picker } = setup()
       expect(picker.showViewSelection.value).toBe(false)
+    })
 
+    it('is false in selecting mode', () => {
+      const { picker } = setup()
       picker.selectDay(new Date(2026, 3, 10))
       expect(picker.showViewSelection.value).toBe(false)
     })
@@ -287,7 +290,7 @@ describe('useDateRangePicker', () => {
       expect(picker.showViewSelection.value).toBe(false)
     })
 
-    it('is true when range is not visible after navigation', () => {
+    it('is true in selected mode when range is not visible after navigation', () => {
       const { picker } = setup()
       picker.selectDay(new Date(2026, 3, 10))
       picker.selectDay(new Date(2026, 3, 20))
@@ -296,6 +299,16 @@ describe('useDateRangePicker', () => {
       picker.navigateNext()
       picker.navigateNext()
       picker.navigateNext()
+      expect(picker.showViewSelection.value).toBe(true)
+    })
+
+    it('is true in idle mode when committed range is not visible', () => {
+      const { picker } = setup(new Date(2026, 3, 10), new Date(2026, 3, 20))
+      // Committed range in April; navigate far away to hide it
+      picker.navigateNext()
+      picker.navigateNext()
+      picker.navigateNext()
+      expect(picker.mode.value).toBe('idle')
       expect(picker.showViewSelection.value).toBe(true)
     })
   })
@@ -325,6 +338,18 @@ describe('useDateRangePicker', () => {
       picker.navigateNext()
       picker.navigateNext()
       picker.navigateNext()
+
+      picker.viewSelection()
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 })
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 5 })
+    })
+
+    it('refocuses the committed range from idle mode', () => {
+      const { picker } = setup(new Date(2026, 3, 10), new Date(2026, 4, 20))
+      picker.navigateNext()
+      picker.navigateNext()
+      picker.navigateNext()
+      expect(picker.mode.value).toBe('idle')
 
       picker.viewSelection()
       expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 })
