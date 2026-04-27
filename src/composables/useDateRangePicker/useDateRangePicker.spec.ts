@@ -563,14 +563,58 @@ describe('useDateRangePicker', () => {
       return { start: rs?.dayOfMonth, end: re?.dayOfMonth }
     }
 
-    it('is inactive outside selected mode', () => {
+    it('is inactive in idle without a committed range', () => {
       const { picker } = setup()
       picker.startDragEndpoint('start')
       expect(picker.draggingKind.value).toBeNull()
+      expect(picker.mode.value).toBe('idle')
+    })
 
+    it('is inactive in selecting mode', () => {
+      const { picker } = setup()
       picker.selectDay(new Date(2026, 3, 10)) // selecting
       picker.startDragEndpoint('start')
       expect(picker.draggingKind.value).toBeNull()
+      expect(picker.mode.value).toBe('selecting')
+    })
+
+    it('activates drag from idle when a committed range exists and transitions to selected', () => {
+      const { picker } = setup(new Date(2026, 3, 10), new Date(2026, 3, 20))
+      expect(picker.mode.value).toBe('idle')
+
+      picker.startDragEndpoint('start')
+      expect(picker.mode.value).toBe('selected')
+      expect(picker.draggingKind.value).toBe('start')
+      expect(picker.dragSourceSide.value).toBe('left')
+    })
+
+    it('drag from idle then commit persists the adjusted range', () => {
+      const { picker, committedStart, committedEnd } = setup(
+        new Date(2026, 3, 10),
+        new Date(2026, 3, 20),
+      )
+      picker.startDragEndpoint('end')
+      picker.updateDragHover(new Date(2026, 3, 25))
+      picker.commitDrag()
+      picker.commit()
+
+      expect(committedStart.value?.getDate()).toBe(10)
+      expect(committedEnd.value?.getDate()).toBe(25)
+    })
+
+    it('drag from idle then reset reverts to the original committed range', () => {
+      const { picker, committedStart, committedEnd } = setup(
+        new Date(2026, 3, 10),
+        new Date(2026, 3, 20),
+      )
+      picker.startDragEndpoint('end')
+      picker.updateDragHover(new Date(2026, 3, 25))
+      picker.commitDrag()
+      picker.reset()
+
+      expect(committedStart.value?.getDate()).toBe(10)
+      expect(committedEnd.value?.getDate()).toBe(20)
+      expect(picker.mode.value).toBe('idle')
     })
 
     it('activates drag in selected mode', () => {
