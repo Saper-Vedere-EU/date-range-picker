@@ -1,2 +1,2 @@
 export { default as DateRangePicker } from './DateRangePicker.vue'
-export type { DateRangePickerProps } from './types'
+export type { DateRangePickerProps, DateRangePickerMode } from './types'

@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { mount, type VueWrapper } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import DateRangePicker from './DateRangePicker.vue'
 
 type PickerWrapper = VueWrapper<InstanceType<typeof DateRangePicker>>
@@ -147,6 +148,112 @@ describe('DateRangePicker', () => {
     const w = mount(DateRangePicker)
     const rootStyle = (w.find('.drp-date-range-picker').element as HTMLElement).style
     expect(rootStyle.getPropertyValue('--drp-accent')).toBe('')
+  })
+
+  describe('mode="input"', () => {
+    const mountedWrappers: VueWrapper[] = []
+    afterEach(() => {
+      while (mountedWrappers.length) mountedWrappers.pop()?.unmount()
+    })
+    function mountInput(props: Record<string, unknown> = {}) {
+      const w = mount(DateRangePicker, {
+        props: { mode: 'input', ...props },
+        attachTo: document.body,
+      })
+      mountedWrappers.push(w)
+      return w
+    }
+
+    it('renders a text input instead of the inline calendar', () => {
+      const w = mountInput()
+      expect(w.find('input.drp-input').exists()).toBe(true)
+      expect(w.find('.drp-calendar-month').exists()).toBe(false)
+    })
+
+    it('opens the popover on input focus', async () => {
+      const w = mountInput()
+      await w.find('input').trigger('focus')
+      await nextTick()
+      expect(document.body.querySelector('.drp-popover')).not.toBeNull()
+      expect(document.body.querySelector('.drp-calendar-month')).not.toBeNull()
+    })
+
+    it('initializes the popover with the v-model range', async () => {
+      const w = mountInput({ start: new Date(2026, 3, 5), end: new Date(2026, 3, 15) })
+      expect((w.find('input').element as HTMLInputElement).value).toBe('05/04/2026 - 15/04/2026')
+      await w.find('input').trigger('focus')
+      await nextTick()
+      // Once opened, the calendar renders the range — selected-start & range-end cells exist
+      expect(document.body.querySelector('.drp-day--range-start')).not.toBeNull()
+      expect(document.body.querySelector('.drp-day--range-end')).not.toBeNull()
+    })
+
+    it('typing a complete valid range updates v-model', async () => {
+      const w = mountInput({ start: undefined, end: undefined })
+      const input = w.find('input')
+      await input.setValue('15/04/2026 - 20/04/2026')
+
+      const startEvents = w.emitted('update:start')
+      const endEvents = w.emitted('update:end')
+      expect(startEvents).toBeTruthy()
+      expect(endEvents).toBeTruthy()
+      expect((startEvents![0][0] as Date).getTime()).toBe(new Date(2026, 3, 15).getTime())
+    })
+
+    it('forwards the input slot, replacing the default input', async () => {
+      const w = mountInput({
+        start: new Date(2026, 3, 5),
+        end: new Date(2026, 3, 15),
+      })
+      // Re-mount with slot — mountInput doesn't accept slots, so build directly:
+      w.unmount()
+
+      const direct = mount(DateRangePicker, {
+        props: {
+          mode: 'input',
+          start: new Date(2026, 3, 5),
+          end: new Date(2026, 3, 15),
+        },
+        slots: {
+          input: `<template #input="b">
+            <input class="my-custom-input" :value="b.value" @input="b.onValueChange($event.target.value)" @focus="b.onFocus" />
+          </template>`,
+        } as never,
+        attachTo: document.body,
+      })
+      mountedWrappers.push(direct)
+
+      expect(direct.find('input.drp-input').exists()).toBe(false)
+      expect(direct.find('input.my-custom-input').exists()).toBe(true)
+      expect((direct.find('input.my-custom-input').element as HTMLInputElement).value).toBe(
+        '05/04/2026 - 15/04/2026',
+      )
+
+      await direct.find('input.my-custom-input').trigger('focus')
+      await nextTick()
+      expect(document.body.querySelector('.drp-popover')).not.toBeNull()
+    })
+
+    it('committing via the action bar closes the popover', async () => {
+      const w = mountInput()
+      await w.find('input').trigger('focus')
+      await nextTick()
+
+      // Select two days to enter 'selected' mode and surface the commit button
+      const days = document.body.querySelectorAll<HTMLElement>(
+        '.drp-day:not(.drp-day--outside):not(.drp-day--disabled)',
+      )
+      days[0].click()
+      await nextTick()
+      days[5].click()
+      await nextTick()
+
+      const commitBtn = document.body.querySelector<HTMLElement>('.drp-action-btn--primary')
+      expect(commitBtn).not.toBeNull()
+      commitBtn!.click()
+      await nextTick()
+      expect(document.body.querySelector('.drp-popover')).toBeNull()
+    })
   })
 
   it('clicking a day in selected mode starts new selection', async () => {

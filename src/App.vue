@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { DateRangePicker } from './components/organisms/DateRangePicker'
-import type { DateRangePickerTheme } from './theme'
+import type { DateRangePickerMode, DateRangePickerTheme } from './index'
 
 const start = ref<Date | undefined>()
 const end = ref<Date | undefined>()
+const mode = ref<DateRangePickerMode>('inline')
 
 const themes: Record<string, Partial<DateRangePickerTheme>> = {
   default: {},
@@ -40,11 +41,36 @@ const current = ref<keyof typeof themes>('default')
         {{ key }}
       </button>
     </div>
-    <DateRangePicker
-      v-model:start="start"
-      v-model:end="end"
-      :theme="themes[current]"
-    ></DateRangePicker>
+    <div class="mode-switch">
+      <label>
+        <input type="radio" value="inline" v-model="mode" />
+        inline
+      </label>
+      <label>
+        <input type="radio" value="input" v-model="mode" />
+        input
+      </label>
+    </div>
+    <DateRangePicker v-model:start="start" v-model:end="end" :theme="themes[current]" :mode="mode">
+      <!-- Demonstrates the #input slot: a fancy wrapped input replacing the default
+           drp-input. In a real app this could be PrimeVue's <InputText />, Vuetify's
+           <v-text-field />, etc. -->
+      <template #input="{ value, onValueChange, onFocus, onBlur, onKeydown, attrs }">
+        <label class="custom-input">
+          <span class="custom-input__icon" aria-hidden="true">📅</span>
+          <input
+            class="custom-input__field"
+            type="text"
+            :value="value"
+            @input="onValueChange(($event.target as HTMLInputElement).value)"
+            @focus="onFocus"
+            @blur="onBlur"
+            @keydown="onKeydown"
+            v-bind="attrs"
+          />
+        </label>
+      </template>
+    </DateRangePicker>
     <div class="debug">
       <p>
         <strong>Start:</strong>
@@ -79,6 +105,43 @@ const current = ref<keyof typeof themes>('default')
   background: #fff;
   cursor: pointer;
   text-transform: capitalize;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.custom-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff, #fafafa);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.custom-input:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.custom-input__icon {
+  font-size: 16px;
+}
+
+.custom-input__field {
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  min-width: 240px;
 }
 
 .debug {
