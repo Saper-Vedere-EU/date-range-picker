@@ -310,7 +310,16 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
   // --- Drag to adjust (selected mode only) ---
 
   function startDragEndpoint(endpoint: 'start' | 'end') {
-    if (mode.value !== 'selected') return
+    if (mode.value === 'idle') {
+      if (!committedStart.value || !committedEnd.value) return
+      tentativeStart.value = committedStart.value
+      tentativeEnd.value = committedEnd.value
+      committedStartSnapshot.value = committedStart.value
+      committedEndSnapshot.value = committedEnd.value
+      mode.value = 'selected'
+    } else if (mode.value !== 'selected') {
+      return
+    }
     draggingKind.value = endpoint
     dragHoverDate.value = null
     dragAnchorDate.value = null
