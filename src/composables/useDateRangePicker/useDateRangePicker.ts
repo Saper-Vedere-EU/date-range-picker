@@ -397,6 +397,23 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     }
   }
 
+  function focusCommittedRange() {
+    const cs = committedStart.value
+    const ce = committedEnd.value
+    if (!cs) return
+
+    const startYm = yearMonthFromDate(cs)
+    const endYm = ce ? yearMonthFromDate(ce) : null
+
+    if (!endYm || compareYearMonth(startYm, endYm) === 0) {
+      leftMonth.value = { ...startYm }
+      rightMonth.value = nextMonth(startYm)
+    } else {
+      leftMonth.value = { ...startYm }
+      rightMonth.value = { ...endYm }
+    }
+  }
+
   return {
     mode: computed(() => mode.value),
     leftMonth: computed(() => leftMonth.value),
@@ -413,6 +430,7 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     commit,
     reset,
     viewSelection,
+    focusCommittedRange,
     openMonthPicker,
     selectMonth,
     openYearPicker,

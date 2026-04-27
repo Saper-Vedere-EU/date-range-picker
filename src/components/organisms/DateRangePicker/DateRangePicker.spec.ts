@@ -194,6 +194,35 @@ describe('DateRangePicker', () => {
       expect(document.body.querySelector('.drp-day--range-end')).not.toBeNull()
     })
 
+    it('reopens the popover focused on the committed range after navigating away', async () => {
+      const start = new Date(2026, 3, 5)
+      const end = new Date(2026, 3, 15)
+      const w = mountInput({ start, end })
+
+      await w.find('input').trigger('focus')
+      await nextTick()
+      expect(document.body.querySelector('.drp-day--range-start')).not.toBeNull()
+
+      // Navigate away — left calendar moves forward
+      const nextArrow = document.body.querySelector<HTMLElement>('.drp-nav-arrow--right')
+      nextArrow!.click()
+      nextArrow!.click()
+      await nextTick()
+      // Range no longer visible
+      expect(document.body.querySelector('.drp-day--range-start')).toBeNull()
+
+      // Close and reopen
+      await w.find('input').trigger('blur')
+      await nextTick()
+      // Click outside-style close: just trigger focus again to reopen
+      await w.find('input').trigger('focus')
+      await nextTick()
+
+      // Calendars should be back on the committed range
+      expect(document.body.querySelector('.drp-day--range-start')).not.toBeNull()
+      expect(document.body.querySelector('.drp-day--range-end')).not.toBeNull()
+    })
+
     it('typing a complete valid range updates v-model', async () => {
       const w = mountInput({ start: undefined, end: undefined })
       const input = w.find('input')

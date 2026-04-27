@@ -47,6 +47,7 @@ const popoverOpen = ref(false)
 const inputWrapperEl = ref<HTMLDivElement | null>(null)
 
 function openPopover() {
+  focusCommittedRange()
   popoverOpen.value = true
 }
 
@@ -88,6 +89,7 @@ const {
   commit,
   reset,
   viewSelection,
+  focusCommittedRange,
   openMonthPicker,
   selectMonth,
   openYearPicker,
