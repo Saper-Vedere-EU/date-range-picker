@@ -4,6 +4,11 @@ import { CalendarNavigation } from '@/components/molecules/CalendarNavigation'
 import { ActionBar } from '@/components/molecules/ActionBar'
 import { DateRangeInput } from '@/components/molecules/DateRangeInput'
 import { Popover } from '@/components/molecules/Popover'
+import {
+  PresetList,
+  type DateRangePickerPreset,
+  type DateRangePickerPresets,
+} from '@/components/molecules/PresetList'
 import { useDateRangePicker } from '@/composables/useDateRangePicker'
 import type { PickerState } from '@/composables/useDateRangePicker/types'
 import { defaultMessages, type DateRangePickerMessages } from '@/messages'
@@ -23,6 +28,7 @@ const props = withDefaults(
     inputFormat?: string
     inputSeparator?: string
     inputPlaceholder?: string
+    presets?: DateRangePickerPresets
   }>(),
   {
     locale: 'fr-FR',
@@ -32,6 +38,7 @@ const props = withDefaults(
     inputFormat: 'dd/MM/yyyy',
     inputSeparator: ' - ',
     inputPlaceholder: undefined,
+    presets: () => [],
   },
 )
 
@@ -71,6 +78,16 @@ defineSlots<{
    * {@link DateRangeInputSlotBindings}.
    */
   input(bindings: DateRangeInputSlotBindings): unknown
+  /**
+   * Replace the default preset list. Receives the presets normalised as
+   * groups (each inner array is rendered as one section, separated visually
+   * from the next) and an `onSelect` handler — call it with a preset to
+   * apply the corresponding range and switch the picker to `selected` mode.
+   */
+  presets(props: {
+    groups: DateRangePickerPreset[][]
+    onSelect: (preset: DateRangePickerPreset) => void
+  }): unknown
 }>()
 
 const {
@@ -88,6 +105,7 @@ const {
   navigateNext,
   commit,
   reset,
+  applyRange,
   viewSelection,
   focusCommittedRange,
   openMonthPicker,
@@ -111,62 +129,89 @@ function onCommit() {
   commit()
   if (props.mode === 'input') closePopover()
 }
+
+function onSelectPreset(preset: DateRangePickerPreset) {
+  const { start: s, end: e } = preset.getRange()
+  applyRange(s, e)
+}
+
+const presetGroups = computed<DateRangePickerPreset[][]>(() => {
+  const p = props.presets
+  if (!p || p.length === 0) return []
+  // 2D shape: first item is itself an array
+  if (Array.isArray(p[0])) return (p as DateRangePickerPreset[][]).filter((g) => g.length > 0)
+  return [p as DateRangePickerPreset[]]
+})
+
+const hasPresets = computed(() =>
+  presetGroups.value.some((g) => g.length > 0),
+)
 </script>
 
 <template>
   <!-- Inline mode: render calendar directly -->
   <div v-if="mode === 'inline'" class="drp-date-range-picker" :style="themeStyle">
-    <CalendarNavigation
-      :left-year="leftMonth.year"
-      :left-month="leftMonth.month"
-      :left-grid="leftGrid"
-      :right-year="rightMonth.year"
-      :right-month="rightMonth.month"
-      :right-grid="rightGrid"
-      :messages="mergedMessages"
-      :locale="locale"
-      :month-picker-side="monthPickerSide"
-      :year-picker-side="yearPickerSide"
-      :year-picker-base-year="yearPickerBaseYear"
-      :drag-source-side="dragSourceSide"
-      @prev="navigatePrev"
-      @next="navigateNext"
-      @select-day="selectDay"
-      @click-month-header="openMonthPicker"
-      @click-year-header="openYearPicker"
-      @select-month="selectMonth"
-      @select-year="selectYear"
-      @drag-start-endpoint="startDragEndpoint"
-      @drag-hover="updateDragHover"
-      @drag-drop="commitDrag"
-      @drag-end="cancelDrag"
-      @auto-page-prev="pageSourcePrev"
-      @auto-page-next="pageSourceNext"
-    >
-      <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
-        <slot name="nav-prev" v-bind="slotProps" />
-      </template>
-      <template v-if="$slots['nav-next']" #nav-next="slotProps">
-        <slot name="nav-next" v-bind="slotProps" />
-      </template>
-    </CalendarNavigation>
     <slot
-      name="action-bar"
-      :state="pickerMode"
-      :show-view-selection="showViewSelection"
-      :on-commit="onCommit"
-      :on-reset="reset"
-      :on-view-selection="viewSelection"
+      v-if="hasPresets"
+      name="presets"
+      :groups="presetGroups"
+      :on-select="onSelectPreset"
     >
-      <ActionBar
+      <PresetList :groups="presetGroups" @select="onSelectPreset" />
+    </slot>
+    <div class="drp-date-range-picker__main">
+      <CalendarNavigation
+        :left-year="leftMonth.year"
+        :left-month="leftMonth.month"
+        :left-grid="leftGrid"
+        :right-year="rightMonth.year"
+        :right-month="rightMonth.month"
+        :right-grid="rightGrid"
+        :messages="mergedMessages"
+        :locale="locale"
+        :month-picker-side="monthPickerSide"
+        :year-picker-side="yearPickerSide"
+        :year-picker-base-year="yearPickerBaseYear"
+        :drag-source-side="dragSourceSide"
+        @prev="navigatePrev"
+        @next="navigateNext"
+        @select-day="selectDay"
+        @click-month-header="openMonthPicker"
+        @click-year-header="openYearPicker"
+        @select-month="selectMonth"
+        @select-year="selectYear"
+        @drag-start-endpoint="startDragEndpoint"
+        @drag-hover="updateDragHover"
+        @drag-drop="commitDrag"
+        @drag-end="cancelDrag"
+        @auto-page-prev="pageSourcePrev"
+        @auto-page-next="pageSourceNext"
+      >
+        <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
+          <slot name="nav-prev" v-bind="slotProps" />
+        </template>
+        <template v-if="$slots['nav-next']" #nav-next="slotProps">
+          <slot name="nav-next" v-bind="slotProps" />
+        </template>
+      </CalendarNavigation>
+      <slot
+        name="action-bar"
         :state="pickerMode"
         :show-view-selection="showViewSelection"
-        :messages="mergedMessages"
-        @commit="onCommit"
-        @reset="reset"
-        @view-selection="viewSelection"
-      />
-    </slot>
+        :on-commit="onCommit"
+        :on-reset="reset"
+        :on-view-selection="viewSelection"
+      >
+        <ActionBar
+          :state="pickerMode"
+          :show-view-selection="showViewSelection"
+          :messages="mergedMessages"
+          @commit="onCommit"
+          @reset="reset"
+          @view-selection="viewSelection"
+        />
+      </slot>
+    </div>
   </div>
 
   <!-- Input mode: text input + popover -->
@@ -188,57 +233,67 @@ function onCommit() {
     </DateRangeInput>
     <Popover :open="popoverOpen" :anchor="inputWrapperEl" @close="closePopover">
       <div class="drp-date-range-picker" :style="themeStyle">
-        <CalendarNavigation
-          :left-year="leftMonth.year"
-          :left-month="leftMonth.month"
-          :left-grid="leftGrid"
-          :right-year="rightMonth.year"
-          :right-month="rightMonth.month"
-          :right-grid="rightGrid"
-          :messages="mergedMessages"
-          :locale="locale"
-          :month-picker-side="monthPickerSide"
-          :year-picker-side="yearPickerSide"
-          :year-picker-base-year="yearPickerBaseYear"
-          :drag-source-side="dragSourceSide"
-          @prev="navigatePrev"
-          @next="navigateNext"
-          @select-day="selectDay"
-          @click-month-header="openMonthPicker"
-          @click-year-header="openYearPicker"
-          @select-month="selectMonth"
-          @select-year="selectYear"
-          @drag-start-endpoint="startDragEndpoint"
-          @drag-hover="updateDragHover"
-          @drag-drop="commitDrag"
-          @drag-end="cancelDrag"
-          @auto-page-prev="pageSourcePrev"
-          @auto-page-next="pageSourceNext"
-        >
-          <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
-            <slot name="nav-prev" v-bind="slotProps" />
-          </template>
-          <template v-if="$slots['nav-next']" #nav-next="slotProps">
-            <slot name="nav-next" v-bind="slotProps" />
-          </template>
-        </CalendarNavigation>
         <slot
-          name="action-bar"
-          :state="pickerMode"
-          :show-view-selection="showViewSelection"
-          :on-commit="onCommit"
-          :on-reset="reset"
-          :on-view-selection="viewSelection"
+          v-if="hasPresets"
+          name="presets"
+          :groups="presetGroups"
+          :on-select="onSelectPreset"
         >
-          <ActionBar
+          <PresetList :groups="presetGroups" @select="onSelectPreset" />
+        </slot>
+        <div class="drp-date-range-picker__main">
+          <CalendarNavigation
+            :left-year="leftMonth.year"
+            :left-month="leftMonth.month"
+            :left-grid="leftGrid"
+            :right-year="rightMonth.year"
+            :right-month="rightMonth.month"
+            :right-grid="rightGrid"
+            :messages="mergedMessages"
+            :locale="locale"
+            :month-picker-side="monthPickerSide"
+            :year-picker-side="yearPickerSide"
+            :year-picker-base-year="yearPickerBaseYear"
+            :drag-source-side="dragSourceSide"
+            @prev="navigatePrev"
+            @next="navigateNext"
+            @select-day="selectDay"
+            @click-month-header="openMonthPicker"
+            @click-year-header="openYearPicker"
+            @select-month="selectMonth"
+            @select-year="selectYear"
+            @drag-start-endpoint="startDragEndpoint"
+            @drag-hover="updateDragHover"
+            @drag-drop="commitDrag"
+            @drag-end="cancelDrag"
+            @auto-page-prev="pageSourcePrev"
+            @auto-page-next="pageSourceNext"
+          >
+            <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
+              <slot name="nav-prev" v-bind="slotProps" />
+            </template>
+            <template v-if="$slots['nav-next']" #nav-next="slotProps">
+              <slot name="nav-next" v-bind="slotProps" />
+            </template>
+          </CalendarNavigation>
+          <slot
+            name="action-bar"
             :state="pickerMode"
             :show-view-selection="showViewSelection"
-            :messages="mergedMessages"
-            @commit="onCommit"
-            @reset="reset"
-            @view-selection="viewSelection"
-          />
-        </slot>
+            :on-commit="onCommit"
+            :on-reset="reset"
+            :on-view-selection="viewSelection"
+          >
+            <ActionBar
+              :state="pickerMode"
+              :show-view-selection="showViewSelection"
+              :messages="mergedMessages"
+              @commit="onCommit"
+              @reset="reset"
+              @view-selection="viewSelection"
+            />
+          </slot>
+        </div>
       </div>
     </Popover>
   </div>
@@ -270,13 +325,20 @@ function onCommit() {
 <style scoped>
 .drp-date-range-picker {
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 12px;
   padding: 16px;
   border: 1px solid var(--drp-border);
   border-radius: 12px;
   background: var(--drp-bg);
   font-family: var(--drp-font);
   color: var(--drp-text);
+}
+
+.drp-date-range-picker__main {
+  display: flex;
+  flex-direction: column;
 }
 
 .drp-date-range-input-wrapper {

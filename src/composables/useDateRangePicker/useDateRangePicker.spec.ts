@@ -313,6 +313,61 @@ describe('useDateRangePicker', () => {
     })
   })
 
+  describe('applyRange', () => {
+    it('enters selected mode with the given range and frames the calendars', () => {
+      const { picker } = setup()
+      picker.applyRange(new Date(2026, 5, 10), new Date(2026, 6, 5)) // June 10 → July 5
+
+      expect(picker.mode.value).toBe('selected')
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 6 })
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 7 })
+    })
+
+    it('orders inverted ranges', () => {
+      const { picker } = setup()
+      picker.applyRange(new Date(2026, 6, 5), new Date(2026, 5, 10)) // end before start
+
+      const days = [...picker.leftGrid.value.flat(), ...picker.rightGrid.value.flat()]
+      const rs = days.find((d) => d.isRangeStart && !d.isOutsideMonth)
+      const re = days.find((d) => d.isRangeEnd && !d.isOutsideMonth)
+      expect(rs?.dayOfMonth).toBe(10)
+      expect(re?.dayOfMonth).toBe(5)
+    })
+
+    it('frames a same-month range with the next month on the right', () => {
+      const { picker } = setup()
+      picker.applyRange(new Date(2026, 5, 1), new Date(2026, 5, 30)) // June only
+
+      expect(picker.leftMonth.value).toEqual({ year: 2026, month: 6 })
+      expect(picker.rightMonth.value).toEqual({ year: 2026, month: 7 })
+    })
+
+    it('reset reverts to the prior committed range', () => {
+      const { picker, committedStart, committedEnd } = setup(
+        new Date(2026, 3, 1),
+        new Date(2026, 3, 7),
+      )
+      picker.applyRange(new Date(2026, 5, 10), new Date(2026, 5, 20))
+      // Tentative is June 10–20, committed is still April 1–7 until commit
+      expect(picker.mode.value).toBe('selected')
+
+      picker.reset()
+      expect(picker.mode.value).toBe('idle')
+      expect(committedStart.value?.getDate()).toBe(1)
+      expect(committedEnd.value?.getDate()).toBe(7)
+    })
+
+    it('commit persists the applied range', () => {
+      const { picker, committedStart, committedEnd } = setup()
+      picker.applyRange(new Date(2026, 5, 10), new Date(2026, 5, 20))
+      picker.commit()
+
+      expect(committedStart.value?.getDate()).toBe(10)
+      expect(committedEnd.value?.getDate()).toBe(20)
+      expect(picker.mode.value).toBe('idle')
+    })
+  })
+
   describe('viewSelection', () => {
     it('repositions calendars to show the selection', () => {
       const { picker } = setup()

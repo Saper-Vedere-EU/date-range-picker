@@ -8,3 +8,7 @@ export type { PickerState, YearMonth, DayInfo, MonthGrid } from './composables/u
 export { defaultMessages, type DateRangePickerMessages } from './messages'
 export { defaultTheme, themeToCssVars, type DateRangePickerTheme } from './theme'
 export type { DateRangeInputSlotBindings } from './components/molecules/DateRangeInput'
+export type {
+  DateRangePickerPreset,
+  DateRangePickerPresets,
+} from './components/molecules/PresetList'

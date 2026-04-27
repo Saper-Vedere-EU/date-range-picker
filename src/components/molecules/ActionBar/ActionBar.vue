@@ -15,12 +15,12 @@ const isActionable = computed(() => props.state === 'selected')
 <template>
   <div class="drp-action-bar">
     <button
+      v-if="showViewSelection"
       type="button"
-      class="drp-action-btn drp-action-btn--primary"
-      :disabled="!isActionable"
-      @click="emit('commit')"
+      class="drp-action-btn drp-action-btn--tertiary"
+      @click="emit('view-selection')"
     >
-      {{ messages.commit }}
+      {{ messages.viewSelection }}
     </button>
     <button
       type="button"
@@ -31,12 +31,12 @@ const isActionable = computed(() => props.state === 'selected')
       {{ messages.reset }}
     </button>
     <button
-      v-if="showViewSelection"
       type="button"
-      class="drp-action-btn drp-action-btn--tertiary"
-      @click="emit('view-selection')"
+      class="drp-action-btn drp-action-btn--primary"
+      :disabled="!isActionable"
+      @click="emit('commit')"
     >
-      {{ messages.viewSelection }}
+      {{ messages.commit }}
     </button>
   </div>
 </template>
@@ -44,9 +44,10 @@ const isActionable = computed(() => props.state === 'selected')
 <style scoped>
 .drp-action-bar {
   display: flex;
+
   gap: 8px;
   padding-top: 12px;
-  justify-content: center;
+  justify-content: right;
 }
 
 .drp-action-btn {

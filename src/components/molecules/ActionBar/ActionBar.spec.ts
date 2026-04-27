@@ -39,23 +39,25 @@ describe('ActionBar', () => {
     expect(w.find('.drp-action-btn--secondary').attributes('disabled')).toBeUndefined()
   })
 
-  it('shows commit and reset labels in selected state', () => {
+  it('shows reset and commit labels in selected state with commit on the right', () => {
     const w = mount(ActionBar, {
       props: { state: 'selected', showViewSelection: false, messages },
     })
     const buttons = w.findAll('.drp-action-btn')
     expect(buttons).toHaveLength(2)
-    expect(buttons[0].text()).toBe('Valider')
-    expect(buttons[1].text()).toBe('Reset')
+    expect(buttons[0].text()).toBe('Reset')
+    expect(buttons[1].text()).toBe('Valider')
   })
 
-  it('shows view-selection label when showViewSelection is true', () => {
+  it('shows view-selection label first when showViewSelection is true', () => {
     const w = mount(ActionBar, {
       props: { state: 'selected', showViewSelection: true, messages },
     })
     const buttons = w.findAll('.drp-action-btn')
     expect(buttons).toHaveLength(3)
-    expect(buttons[2].text()).toBe('Voir la sélection')
+    expect(buttons[0].text()).toBe('Voir la sélection')
+    expect(buttons[1].text()).toBe('Reset')
+    expect(buttons[2].text()).toBe('Valider')
   })
 
   it('renders custom messages', () => {
@@ -67,9 +69,9 @@ describe('ActionBar', () => {
       },
     })
     const buttons = w.findAll('.drp-action-btn')
-    expect(buttons[0].text()).toBe('Apply')
+    expect(buttons[0].text()).toBe('Show')
     expect(buttons[1].text()).toBe('Cancel')
-    expect(buttons[2].text()).toBe('Show')
+    expect(buttons[2].text()).toBe('Apply')
   })
 
   it('emits commit when primary button is clicked', async () => {

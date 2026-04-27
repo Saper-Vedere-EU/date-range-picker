@@ -298,6 +298,30 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     mode.value = 'idle'
   }
 
+  function applyRange(rangeStart: Date, rangeEnd: Date) {
+    const [s, e] = orderDates(rangeStart, rangeEnd)
+    committedStartSnapshot.value = committedStart.value
+    committedEndSnapshot.value = committedEnd.value
+    tentativeStart.value = s
+    tentativeEnd.value = e
+    anchor.value = null
+    draggingKind.value = null
+    dragHoverDate.value = null
+    dragAnchorDate.value = null
+    dragSourceSide.value = null
+    mode.value = 'selected'
+
+    const startYm = yearMonthFromDate(s)
+    const endYm = yearMonthFromDate(e)
+    if (compareYearMonth(startYm, endYm) === 0) {
+      leftMonth.value = { ...startYm }
+      rightMonth.value = nextMonth(startYm)
+    } else {
+      leftMonth.value = { ...startYm }
+      rightMonth.value = { ...endYm }
+    }
+  }
+
   function reset() {
     if (mode.value !== 'selected') return
     committedStart.value = committedStartSnapshot.value
@@ -450,6 +474,7 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     navigateNext,
     commit,
     reset,
+    applyRange,
     viewSelection,
     focusCommittedRange,
     openMonthPicker,

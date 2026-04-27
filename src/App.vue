@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { DateRangePicker } from './components/organisms/DateRangePicker'
-import type { DateRangePickerMode, DateRangePickerTheme } from './index'
+import type { DateRangePickerMode, DateRangePickerTheme, DateRangePickerPreset } from './index'
 
 const start = ref<Date | undefined>()
 const end = ref<Date | undefined>()
@@ -31,6 +31,100 @@ const themes: Record<string, Partial<DateRangePickerTheme>> = {
 }
 
 const current = ref<keyof typeof themes>('default')
+
+function startOfDay(d: Date) {
+  const r = new Date(d)
+  r.setHours(0, 0, 0, 0)
+  return r
+}
+function shift(d: Date, days: number) {
+  const r = new Date(d)
+  r.setDate(r.getDate() + days)
+  return r
+}
+function lastDays(n: number) {
+  const today = startOfDay(new Date())
+  return { start: shift(today, -(n - 1)), end: today }
+}
+function quarterStartMonth(month: number) {
+  return Math.floor(month / 3) * 3 // 0-indexed
+}
+
+const presets: DateRangePickerPreset[][] = [
+  [
+    { title: '1 jour', getRange: () => lastDays(1) },
+    { title: '7 derniers jours', getRange: () => lastDays(7) },
+    { title: '14 derniers jours', getRange: () => lastDays(14) },
+    { title: '30 derniers jours', getRange: () => lastDays(30) },
+    { title: '365 derniers jours', getRange: () => lastDays(365) },
+  ],
+  [
+    {
+      title: 'Mois en cours',
+      getRange: () => {
+        const t = startOfDay(new Date())
+        return {
+          start: new Date(t.getFullYear(), t.getMonth(), 1),
+          end: new Date(t.getFullYear(), t.getMonth() + 1, 0),
+        }
+      },
+    },
+    {
+      title: 'Trimestre en cours',
+      getRange: () => {
+        const t = startOfDay(new Date())
+        const qm = quarterStartMonth(t.getMonth())
+        return {
+          start: new Date(t.getFullYear(), qm, 1),
+          end: new Date(t.getFullYear(), qm + 3, 0),
+        }
+      },
+    },
+    {
+      title: 'Année en cours',
+      getRange: () => {
+        const t = startOfDay(new Date())
+        return {
+          start: new Date(t.getFullYear(), 0, 1),
+          end: new Date(t.getFullYear(), 11, 31),
+        }
+      },
+    },
+  ],
+  [
+    {
+      title: 'Dernier mois',
+      getRange: () => {
+        const t = startOfDay(new Date())
+        return {
+          start: new Date(t.getFullYear(), t.getMonth() - 1, 1),
+          end: new Date(t.getFullYear(), t.getMonth(), 0),
+        }
+      },
+    },
+    {
+      title: 'Dernier trimestre',
+      getRange: () => {
+        const t = startOfDay(new Date())
+        const qm = quarterStartMonth(t.getMonth())
+        return {
+          start: new Date(t.getFullYear(), qm - 3, 1),
+          end: new Date(t.getFullYear(), qm, 0),
+        }
+      },
+    },
+    {
+      title: 'Dernière année',
+      getRange: () => {
+        const t = startOfDay(new Date())
+        return {
+          start: new Date(t.getFullYear() - 1, 0, 1),
+          end: new Date(t.getFullYear() - 1, 11, 31),
+        }
+      },
+    },
+  ],
+]
 </script>
 
 <template>
@@ -51,7 +145,13 @@ const current = ref<keyof typeof themes>('default')
         input
       </label>
     </div>
-    <DateRangePicker v-model:start="start" v-model:end="end" :theme="themes[current]" :mode="mode">
+    <DateRangePicker
+      v-model:start="start"
+      v-model:end="end"
+      :theme="themes[current]"
+      :mode="mode"
+      :presets="presets"
+    >
       <!-- Demonstrates the #input slot: a fancy wrapped input replacing the default
            drp-input. In a real app this could be PrimeVue's <InputText />, Vuetify's
            <v-text-field />, etc. -->
