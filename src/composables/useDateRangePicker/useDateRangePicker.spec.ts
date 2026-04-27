@@ -648,11 +648,35 @@ describe('useDateRangePicker', () => {
         expect(picker.dragSourceSide.value).toBeNull()
       })
 
-      it('pageSourcePrev on left always advances left back a month', () => {
+      it('pageSourcePrev on left advances left back, pinning right to static bound when both bounds were on left', () => {
         const { picker } = setup()
         picker.selectDay(new Date(2026, 3, 10))
         picker.selectDay(new Date(2026, 3, 20))
-        picker.startDragEndpoint('start') // source=left
+        picker.startDragEndpoint('start') // source=left, end (April 20) is static and also on left
+
+        picker.pageSourcePrev()
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 3 })
+        // Right snaps to the static bound's month so it stays visible during drag
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 4 })
+      })
+
+      it('pageSourcePrev on left keeps right pinned to static bound across multiple pages', () => {
+        const { picker } = setup()
+        picker.selectDay(new Date(2026, 3, 10))
+        picker.selectDay(new Date(2026, 3, 20))
+        picker.startDragEndpoint('start')
+
+        picker.pageSourcePrev()
+        picker.pageSourcePrev()
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 2 })
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 4 })
+      })
+
+      it('pageSourcePrev on left leaves right untouched when bounds straddle calendars', () => {
+        const { picker } = setup()
+        picker.selectDay(new Date(2026, 3, 10)) // left=April, right=May
+        picker.selectDay(new Date(2026, 4, 10)) // start=April, end=May → straddles
+        picker.startDragEndpoint('start') // source=left, static bound on right
 
         picker.pageSourcePrev()
         expect(picker.leftMonth.value).toEqual({ year: 2026, month: 3 })
@@ -716,6 +740,32 @@ describe('useDateRangePicker', () => {
         picker.pageSourceNext()
         expect(picker.leftMonth.value).toEqual({ year: 2026, month: 4 })
         expect(picker.rightMonth.value).toEqual({ year: 2026, month: 6 })
+      })
+
+      it('pageSourceNext on right pins left to static bound when both bounds were on right', () => {
+        const { picker } = setup()
+        picker.selectDay(new Date(2026, 4, 10)) // anchor → left=May, right=June
+        picker.selectDay(new Date(2026, 4, 20)) // selected, both bounds in May (left)
+        picker.navigatePrev() // shift: left=April, right=May → both bounds now on right=May
+        picker.startDragEndpoint('end') // source=right, start (May 10) is static on right
+
+        picker.pageSourceNext()
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 6 })
+        // Left snaps to the static bound's month
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 5 })
+      })
+
+      it('pageSourceNext on right keeps left pinned to static bound across multiple pages', () => {
+        const { picker } = setup()
+        picker.selectDay(new Date(2026, 4, 10))
+        picker.selectDay(new Date(2026, 4, 20))
+        picker.navigatePrev() // both bounds on right=May
+        picker.startDragEndpoint('end')
+
+        picker.pageSourceNext()
+        picker.pageSourceNext()
+        expect(picker.rightMonth.value).toEqual({ year: 2026, month: 7 })
+        expect(picker.leftMonth.value).toEqual({ year: 2026, month: 5 })
       })
 
       it('page methods are no-ops when there is no drag source', () => {

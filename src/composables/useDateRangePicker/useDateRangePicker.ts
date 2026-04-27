@@ -356,9 +356,23 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     dragSourceSide.value = null
   }
 
+  function staticDragBoundDate(): Date | null {
+    if (draggingKind.value === 'start') return tentativeEnd.value
+    if (draggingKind.value === 'end') return tentativeStart.value
+    return null
+  }
+
   function pageSourcePrev() {
     if (dragSourceSide.value === 'left') {
-      leftMonth.value = prevMonth(leftMonth.value)
+      const oldLeft = leftMonth.value
+      leftMonth.value = prevMonth(oldLeft)
+
+      // If both bounds were on the source (left) calendar, keep the static
+      // (non-dragged) bound visible by snapping the right calendar to it.
+      const staticBound = staticDragBoundDate()
+      if (staticBound && isSameMonth(staticBound, oldLeft)) {
+        rightMonth.value = yearMonthFromDate(staticBound)
+      }
     } else if (dragSourceSide.value === 'right') {
       const candidate = prevMonth(rightMonth.value)
       if (compareYearMonth(candidate, leftMonth.value) > 0) {
@@ -374,7 +388,13 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
         leftMonth.value = candidate
       }
     } else if (dragSourceSide.value === 'right') {
-      rightMonth.value = nextMonth(rightMonth.value)
+      const oldRight = rightMonth.value
+      rightMonth.value = nextMonth(oldRight)
+
+      const staticBound = staticDragBoundDate()
+      if (staticBound && isSameMonth(staticBound, oldRight)) {
+        leftMonth.value = yearMonthFromDate(staticBound)
+      }
     }
   }
 
