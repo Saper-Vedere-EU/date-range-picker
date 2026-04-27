@@ -9,18 +9,34 @@ const messages = {
 }
 
 describe('ActionBar', () => {
-  it('is hidden in idle state', () => {
+  it('renders with disabled commit and reset in idle state', () => {
     const w = mount(ActionBar, {
       props: { state: 'idle', showViewSelection: false, messages },
     })
-    expect(w.find('.drp-action-bar').exists()).toBe(false)
+    expect(w.find('.drp-action-bar').exists()).toBe(true)
+    const primary = w.find('.drp-action-btn--primary')
+    const secondary = w.find('.drp-action-btn--secondary')
+    expect(primary.attributes('disabled')).toBeDefined()
+    expect(secondary.attributes('disabled')).toBeDefined()
   })
 
-  it('is hidden in selecting state', () => {
+  it('renders with disabled commit and reset in selecting state', () => {
     const w = mount(ActionBar, {
       props: { state: 'selecting', showViewSelection: false, messages },
     })
-    expect(w.find('.drp-action-bar').exists()).toBe(false)
+    expect(w.find('.drp-action-bar').exists()).toBe(true)
+    const primary = w.find('.drp-action-btn--primary')
+    const secondary = w.find('.drp-action-btn--secondary')
+    expect(primary.attributes('disabled')).toBeDefined()
+    expect(secondary.attributes('disabled')).toBeDefined()
+  })
+
+  it('enables commit and reset in selected state', () => {
+    const w = mount(ActionBar, {
+      props: { state: 'selected', showViewSelection: false, messages },
+    })
+    expect(w.find('.drp-action-btn--primary').attributes('disabled')).toBeUndefined()
+    expect(w.find('.drp-action-btn--secondary').attributes('disabled')).toBeUndefined()
   })
 
   it('shows commit and reset labels in selected state', () => {

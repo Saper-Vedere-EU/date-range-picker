@@ -1,20 +1,33 @@
 <script lang="ts" setup>
+import { computed } from 'vue'
 import type { ActionBarProps } from './types'
 
-defineProps<ActionBarProps>()
+const props = defineProps<ActionBarProps>()
 const emit = defineEmits<{
   commit: []
   reset: []
   'view-selection': []
 }>()
+
+const isActionable = computed(() => props.state === 'selected')
 </script>
 
 <template>
-  <div v-if="state === 'selected'" class="drp-action-bar">
-    <button type="button" class="drp-action-btn drp-action-btn--primary" @click="emit('commit')">
+  <div class="drp-action-bar">
+    <button
+      type="button"
+      class="drp-action-btn drp-action-btn--primary"
+      :disabled="!isActionable"
+      @click="emit('commit')"
+    >
       {{ messages.commit }}
     </button>
-    <button type="button" class="drp-action-btn drp-action-btn--secondary" @click="emit('reset')">
+    <button
+      type="button"
+      class="drp-action-btn drp-action-btn--secondary"
+      :disabled="!isActionable"
+      @click="emit('reset')"
+    >
       {{ messages.reset }}
     </button>
     <button
@@ -45,7 +58,13 @@ const emit = defineEmits<{
   border: 1px solid var(--drp-border);
   transition:
     background-color 0.15s,
-    border-color 0.15s;
+    border-color 0.15s,
+    opacity 0.15s;
+}
+
+.drp-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .drp-action-btn--primary {

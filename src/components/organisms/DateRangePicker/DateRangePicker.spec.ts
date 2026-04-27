@@ -16,9 +16,11 @@ describe('DateRangePicker', () => {
     expect(w.findAll('.drp-nav-arrow')).toHaveLength(2)
   })
 
-  it('does not show action bar initially', () => {
+  it('shows action bar with disabled buttons initially', () => {
     const w = mount(DateRangePicker)
-    expect(w.find('.drp-action-bar').exists()).toBe(false)
+    expect(w.find('.drp-action-bar').exists()).toBe(true)
+    expect(w.find('.drp-action-btn--primary').attributes('disabled')).toBeDefined()
+    expect(w.find('.drp-action-btn--secondary').attributes('disabled')).toBeDefined()
   })
 
   it('full flow: select range, validate, emits v-model', async () => {
@@ -35,22 +37,25 @@ describe('DateRangePicker', () => {
     const days = getVisibleDayButtons(w)
     await days[0].trigger('click')
 
-    // Should be in selecting mode (no action bar yet)
-    expect(w.find('.drp-action-bar').exists()).toBe(false)
+    // In selecting mode: action bar visible but commit is disabled
+    expect(w.find('.drp-action-bar').exists()).toBe(true)
+    expect(w.find('.drp-action-btn--primary').attributes('disabled')).toBeDefined()
 
     // Click second day
     const days2 = getVisibleDayButtons(w)
     await days2[5].trigger('click')
 
-    // Should be in selected mode with action bar
+    // Should be in selected mode with commit enabled
     expect(w.find('.drp-action-bar').exists()).toBe(true)
+    expect(w.find('.drp-action-btn--primary').attributes('disabled')).toBeUndefined()
     expect(w.find('.drp-action-btn--primary').text()).toBe('Valider')
 
     // Click Valider
     await w.find('.drp-action-btn--primary').trigger('click')
 
-    // Action bar should disappear (back to idle)
-    expect(w.find('.drp-action-bar').exists()).toBe(false)
+    // Back to idle: action bar still visible but disabled
+    expect(w.find('.drp-action-bar').exists()).toBe(true)
+    expect(w.find('.drp-action-btn--primary').attributes('disabled')).toBeDefined()
 
     // v-model should have been emitted
     expect(w.emitted('update:start')).toBeTruthy()
@@ -81,8 +86,9 @@ describe('DateRangePicker', () => {
     // Click Reset
     await w.find('.drp-action-btn--secondary').trigger('click')
 
-    // Back to idle
-    expect(w.find('.drp-action-bar').exists()).toBe(false)
+    // Back to idle: action bar stays visible but buttons are disabled
+    expect(w.find('.drp-action-bar').exists()).toBe(true)
+    expect(w.find('.drp-action-btn--secondary').attributes('disabled')).toBeDefined()
 
     // Props should still be the originals (reset restores them,
     // but since they were never changed by selecting, no new emit is needed)
@@ -267,12 +273,14 @@ describe('DateRangePicker', () => {
 
     // In selected mode
     expect(w.find('.drp-action-bar').exists()).toBe(true)
+    expect(w.find('.drp-action-btn--primary').attributes('disabled')).toBeUndefined()
 
     // Click another day → back to selecting
     const days3 = getVisibleDayButtons(w)
     await days3[15].trigger('click')
 
-    // Action bar should disappear
-    expect(w.find('.drp-action-bar').exists()).toBe(false)
+    // Action bar still visible but commit disabled while selecting
+    expect(w.find('.drp-action-bar').exists()).toBe(true)
+    expect(w.find('.drp-action-btn--primary').attributes('disabled')).toBeDefined()
   })
 })
