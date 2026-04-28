@@ -150,15 +150,17 @@ onBeforeUnmount(clearPageTimer)
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
   >
-    <slot name="nav-prev" :on-click="onPrevClick">
-      <NavArrow direction="left" :label="messages.prevMonth" @click="onPrevClick" />
-    </slot>
     <div
       class="drp-drop-indicator drp-drop-indicator--prev"
       :class="{ 'drp-drop-indicator--active': activeZone === 'prev' }"
       aria-hidden="true"
     />
     <div ref="leftWrap" class="drp-calendar-slot drp-calendar-slot--left">
+      <div class="drp-nav-arrow-slot drp-nav-arrow-slot--prev">
+        <slot name="nav-prev" :on-click="onPrevClick">
+          <NavArrow direction="left" :label="messages.prevMonth" @click="onPrevClick" />
+        </slot>
+      </div>
       <CalendarMonth
         :year="leftYear"
         :month="leftMonth"
@@ -199,15 +201,17 @@ onBeforeUnmount(clearPageTimer)
         @drop="emit('drag-drop')"
         @drag-end="emit('drag-end')"
       />
+      <div class="drp-nav-arrow-slot drp-nav-arrow-slot--next">
+        <slot name="nav-next" :on-click="onNextClick">
+          <NavArrow direction="right" :label="messages.nextMonth" @click="onNextClick" />
+        </slot>
+      </div>
     </div>
     <div
       class="drp-drop-indicator drp-drop-indicator--next"
       :class="{ 'drp-drop-indicator--active': activeZone === 'next' }"
       aria-hidden="true"
     />
-    <slot name="nav-next" :on-click="onNextClick">
-      <NavArrow direction="right" :label="messages.nextMonth" @click="onNextClick" />
-    </slot>
   </div>
 </template>
 
@@ -217,24 +221,35 @@ onBeforeUnmount(clearPageTimer)
   align-items: flex-start;
 }
 
-.drp-calendar-navigation > .drp-nav-arrow {
-  margin-top: 8px;
-}
-
-.drp-calendar-navigation > .drp-nav-arrow--left {
-  margin-right: 8px;
-}
-
-.drp-calendar-navigation > .drp-nav-arrow--right {
-  margin-left: 8px;
-}
-
 .drp-calendar-slot {
+  position: relative;
   display: flex;
 }
 
 .drp-calendar-slot--left {
   margin-right: 16px;
+}
+
+/*
+ * Arrows sit at the same Y as the month/year header and at the same X as the
+ * first/last column of the day grid. The 2px offset = (cell_width - arrow_width) / 2
+ * with cell_width=36 (CalendarMonth) and arrow_width=32 (NavArrow) — centers the
+ * arrow over the leftmost / rightmost day cell.
+ */
+.drp-nav-arrow-slot {
+  position: absolute;
+  top: 3px; /* vertically centers a 32px arrow on the ~38px-tall month header */
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.drp-nav-arrow-slot--prev {
+  left: 2px;
+}
+
+.drp-nav-arrow-slot--next {
+  right: 2px;
 }
 
 .drp-drop-indicator {
