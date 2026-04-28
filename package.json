@@ -35,7 +35,7 @@
       "import": "./dist/date-range-picker.js",
       "require": "./dist/date-range-picker.cjs"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/date-range-picker.css"
   },
   "files": [
     "dist"

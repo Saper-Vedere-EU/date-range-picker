@@ -143,20 +143,13 @@ const presetGroups = computed<DateRangePickerPreset[][]>(() => {
   return [p as DateRangePickerPreset[]]
 })
 
-const hasPresets = computed(() =>
-  presetGroups.value.some((g) => g.length > 0),
-)
+const hasPresets = computed(() => presetGroups.value.some((g) => g.length > 0))
 </script>
 
 <template>
   <!-- Inline mode: render calendar directly -->
   <div v-if="mode === 'inline'" class="drp-date-range-picker" :style="themeStyle">
-    <slot
-      v-if="hasPresets"
-      name="presets"
-      :groups="presetGroups"
-      :on-select="onSelectPreset"
-    >
+    <slot v-if="hasPresets" name="presets" :groups="presetGroups" :on-select="onSelectPreset">
       <PresetList :groups="presetGroups" @select="onSelectPreset" />
     </slot>
     <div class="drp-date-range-picker__main">
@@ -227,18 +220,13 @@ const hasPresets = computed(() =>
       @focus="openPopover"
       @submit="closePopover"
     >
-      <template v-if="$slots.input" #default="bindings">
+      <template v-if="!!$slots.input" #default="bindings">
         <slot name="input" v-bind="bindings" />
       </template>
     </DateRangeInput>
     <Popover :open="popoverOpen" :anchor="inputWrapperEl" @close="closePopover">
       <div class="drp-date-range-picker" :style="themeStyle">
-        <slot
-          v-if="hasPresets"
-          name="presets"
-          :groups="presetGroups"
-          :on-select="onSelectPreset"
-        >
+        <slot v-if="hasPresets" name="presets" :groups="presetGroups" :on-select="onSelectPreset">
           <PresetList :groups="presetGroups" @select="onSelectPreset" />
         </slot>
         <div class="drp-date-range-picker__main">
