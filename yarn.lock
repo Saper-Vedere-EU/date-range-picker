@@ -418,6 +418,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@saper-vedere/date-range-picker@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@saper-vedere/date-range-picker@workspace:."
+  dependencies:
+    "@types/node": "npm:^24.12.2"
+    "@vitejs/plugin-vue": "npm:^6.0.6"
+    "@vitest/coverage-v8": "npm:^4.1.5"
+    "@vue/compiler-dom": "npm:^3.5.33"
+    "@vue/server-renderer": "npm:^3.5.33"
+    "@vue/test-utils": "npm:^2.4.6"
+    "@vue/tsconfig": "npm:^0.9.1"
+    happy-dom: "npm:^20.9.0"
+    prettier: "npm:^3.8.3"
+    typescript: "npm:~6.0.2"
+    vite: "npm:^8.0.10"
+    vite-plugin-dts: "npm:^4.5.4"
+    vitest: "npm:^4.1.5"
+    vue: "npm:^3.5.32"
+    vue-tsc: "npm:^3.2.7"
+  peerDependencies:
+    vue: ^3.4.0
+  languageName: unknown
+  linkType: soft
+
 "@standard-schema/spec@npm:^1.1.0":
   version: 1.1.0
   resolution: "@standard-schema/spec@npm:1.1.0"
@@ -1062,30 +1086,6 @@ __metadata:
   checksum: 10c0/cd29c51e70fa822f1cecd8641a1445bed7063697469d35633b516e60fe8c1bde04b08f6c5b6022136bb669b64c63d4173af54864510fbb4ee23281801841a3ce
   languageName: node
   linkType: hard
-
-"date-range-picker@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "date-range-picker@workspace:."
-  dependencies:
-    "@types/node": "npm:^24.12.2"
-    "@vitejs/plugin-vue": "npm:^6.0.6"
-    "@vitest/coverage-v8": "npm:^4.1.5"
-    "@vue/compiler-dom": "npm:^3.5.33"
-    "@vue/server-renderer": "npm:^3.5.33"
-    "@vue/test-utils": "npm:^2.4.6"
-    "@vue/tsconfig": "npm:^0.9.1"
-    happy-dom: "npm:^20.9.0"
-    prettier: "npm:^3.8.3"
-    typescript: "npm:~6.0.2"
-    vite: "npm:^8.0.10"
-    vite-plugin-dts: "npm:^4.5.4"
-    vitest: "npm:^4.1.5"
-    vue: "npm:^3.5.32"
-    vue-tsc: "npm:^3.2.7"
-  peerDependencies:
-    vue: ^3.4.0
-  languageName: unknown
-  linkType: soft
 
 "de-indent@npm:^1.0.2":
   version: 1.0.2

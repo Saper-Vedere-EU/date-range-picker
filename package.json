@@ -1,6 +1,30 @@
 {
-  "name": "date-range-picker",
+  "name": "@saper-vedere/date-range-picker",
   "version": "0.1.0",
+  "description": "Vue 3 + TypeScript date range picker with two-month calendar, drag-to-adjust, optional input mode with popover, presets, theming via CSS custom properties, and full slot customisation.",
+  "keywords": [
+    "vue",
+    "vue3",
+    "typescript",
+    "date-picker",
+    "date-range-picker",
+    "calendar",
+    "datepicker",
+    "component"
+  ],
+  "license": "MIT",
+  "author": "Saper Vedere",
+  "homepage": "https://github.com/Saper-Vedere-EU/date-range-picker#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saper-Vedere-EU/date-range-picker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Saper-Vedere-EU/date-range-picker/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/date-range-picker.cjs",
   "module": "./dist/date-range-picker.js",
@@ -29,9 +53,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
-  "dependencies": {
-    "vue": "^3.5.32"
-  },
   "devDependencies": {
     "@types/node": "^24.12.2",
     "@vitejs/plugin-vue": "^6.0.6",
@@ -46,6 +67,7 @@
     "vite": "^8.0.10",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.1.5",
+    "vue": "^3.5.32",
     "vue-tsc": "^3.2.7"
   }
 }
