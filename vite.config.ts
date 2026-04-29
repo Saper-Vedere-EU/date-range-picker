@@ -29,6 +29,9 @@ export default defineConfig({
       formats: ['es', 'cjs'], // ES modules + CommonJS. Ajoute 'umd' si tu veux du <script> CDN
     },
 
+    // Library build: don't ship demo assets (favicon, icons) from `public/`.
+    copyPublicDir: false,
+
     rollupOptions: {
       // Ne bundle PAS Vue avec ton package : il doit venir du projet consommateur
       external: ['vue'],
