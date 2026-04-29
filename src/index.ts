@@ -4,6 +4,12 @@ export type {
   DateRangePickerProps,
   DateRangePickerMode,
 } from './components/organisms/DateRangePicker'
+export { DateRangePickerPanel } from './components/organisms/DateRangePickerPanel'
+export type {
+  DateRangePickerPanelNavSlotProps,
+  DateRangePickerPanelActionBarSlotProps,
+  DateRangePickerPanelPresetsSlotProps,
+} from './components/organisms/DateRangePickerPanel'
 export type { PickerState, YearMonth, DayInfo, MonthGrid } from './composables/useDateRangePicker'
 export { defaultMessages, type DateRangePickerMessages } from './messages'
 export { defaultTheme, themeToCssVars, type DateRangePickerTheme } from './theme'

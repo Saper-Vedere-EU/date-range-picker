@@ -1,20 +1,26 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { CalendarNavigation } from '@/components/molecules/CalendarNavigation'
-import { ActionBar } from '@/components/molecules/ActionBar'
+import { computed, provide, ref } from 'vue'
 import { DateRangeInput } from '@/components/molecules/DateRangeInput'
 import { Popover } from '@/components/molecules/Popover'
 import {
-  PresetList,
   type DateRangePickerPreset,
   type DateRangePickerPresets,
 } from '@/components/molecules/PresetList'
+import { DateRangePickerPanel } from '@/components/organisms/DateRangePickerPanel'
 import { useDateRangePicker } from '@/composables/useDateRangePicker'
-import type { PickerState } from '@/composables/useDateRangePicker/types'
 import { defaultMessages, type DateRangePickerMessages } from '@/messages'
 import { themeToCssVars, type DateRangePickerTheme } from '@/theme'
 import type { DateRangeInputSlotBindings } from '@/components/molecules/DateRangeInput'
 import type { DateRangePickerMode } from './types'
+import {
+  dateRangePickerContextKey,
+  type DateRangePickerContext,
+} from './context'
+import type {
+  DateRangePickerPanelNavSlotProps,
+  DateRangePickerPanelActionBarSlotProps,
+  DateRangePickerPanelPresetsSlotProps,
+} from '@/components/organisms/DateRangePickerPanel'
 
 const start = defineModel<Date | undefined>('start')
 const end = defineModel<Date | undefined>('end')
@@ -42,11 +48,11 @@ const props = withDefaults(
   },
 )
 
+const localeRef = computed(() => props.locale)
 const mergedMessages = computed<DateRangePickerMessages>(() => ({
   ...defaultMessages,
   ...props.messages,
 }))
-
 const themeStyle = computed(() => themeToCssVars(props.theme))
 
 // Input-mode state
@@ -63,15 +69,9 @@ function closePopover() {
 }
 
 defineSlots<{
-  'nav-prev'(props: { onClick: () => void }): unknown
-  'nav-next'(props: { onClick: () => void }): unknown
-  'action-bar'(props: {
-    state: PickerState
-    showViewSelection: boolean
-    onCommit: () => void
-    onReset: () => void
-    onViewSelection: () => void
-  }): unknown
+  'nav-prev'(props: DateRangePickerPanelNavSlotProps): unknown
+  'nav-next'(props: DateRangePickerPanelNavSlotProps): unknown
+  'action-bar'(props: DateRangePickerPanelActionBarSlotProps): unknown
   /**
    * Replace the default text input in `mode="input"`. Receives bindings
    * (value, onValueChange, onFocus, onBlur, onKeydown, attrs) — see
@@ -84,10 +84,14 @@ defineSlots<{
    * from the next) and an `onSelect` handler — call it with a preset to
    * apply the corresponding range and switch the picker to `selected` mode.
    */
-  presets(props: {
-    groups: DateRangePickerPreset[][]
-    onSelect: (preset: DateRangePickerPreset) => void
-  }): unknown
+  presets(props: DateRangePickerPanelPresetsSlotProps): unknown
+  /**
+   * Replace the built-in popover used in `mode="input"`. Receives `open`,
+   * `anchor` (the input wrapper), and `onClose`. Drop a
+   * `<DateRangePickerPanel />` inside your custom popover so the calendar
+   * still mounts. Only used when `mode="input"`.
+   */
+  popover(props: { open: boolean; anchor: HTMLElement | null; onClose: () => void }): unknown
 }>()
 
 const {
@@ -144,70 +148,63 @@ const presetGroups = computed<DateRangePickerPreset[][]>(() => {
 })
 
 const hasPresets = computed(() => presetGroups.value.some((g) => g.length > 0))
+
+const context: DateRangePickerContext = {
+  locale: localeRef,
+  messages: mergedMessages,
+  themeStyle,
+  mode: pickerMode,
+  leftMonth,
+  rightMonth,
+  leftGrid,
+  rightGrid,
+  showViewSelection,
+  monthPickerSide,
+  yearPickerSide,
+  yearPickerBaseYear,
+  dragSourceSide,
+  presetGroups,
+  hasPresets,
+  onSelectPreset,
+  selectDay,
+  navigatePrev,
+  navigateNext,
+  onCommit,
+  reset,
+  viewSelection,
+  openMonthPicker,
+  selectMonth,
+  openYearPicker,
+  selectYear,
+  startDragEndpoint,
+  updateDragHover,
+  commitDrag,
+  cancelDrag,
+  pageSourcePrev,
+  pageSourceNext,
+}
+
+provide(dateRangePickerContextKey, context)
 </script>
 
 <template>
-  <!-- Inline mode: render calendar directly -->
-  <div v-if="mode === 'inline'" class="drp-date-range-picker" :style="themeStyle">
-    <slot v-if="hasPresets" name="presets" :groups="presetGroups" :on-select="onSelectPreset">
-      <PresetList :groups="presetGroups" @select="onSelectPreset" />
-    </slot>
-    <div class="drp-date-range-picker__main">
-      <CalendarNavigation
-        :left-year="leftMonth.year"
-        :left-month="leftMonth.month"
-        :left-grid="leftGrid"
-        :right-year="rightMonth.year"
-        :right-month="rightMonth.month"
-        :right-grid="rightGrid"
-        :messages="mergedMessages"
-        :locale="locale"
-        :month-picker-side="monthPickerSide"
-        :year-picker-side="yearPickerSide"
-        :year-picker-base-year="yearPickerBaseYear"
-        :drag-source-side="dragSourceSide"
-        @prev="navigatePrev"
-        @next="navigateNext"
-        @select-day="selectDay"
-        @click-month-header="openMonthPicker"
-        @click-year-header="openYearPicker"
-        @select-month="selectMonth"
-        @select-year="selectYear"
-        @drag-start-endpoint="startDragEndpoint"
-        @drag-hover="updateDragHover"
-        @drag-drop="commitDrag"
-        @drag-end="cancelDrag"
-        @auto-page-prev="pageSourcePrev"
-        @auto-page-next="pageSourceNext"
-      >
-        <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
-          <slot name="nav-prev" v-bind="slotProps" />
-        </template>
-        <template v-if="$slots['nav-next']" #nav-next="slotProps">
-          <slot name="nav-next" v-bind="slotProps" />
-        </template>
-      </CalendarNavigation>
-      <slot
-        name="action-bar"
-        :state="pickerMode"
-        :show-view-selection="showViewSelection"
-        :on-commit="onCommit"
-        :on-reset="reset"
-        :on-view-selection="viewSelection"
-      >
-        <ActionBar
-          :state="pickerMode"
-          :show-view-selection="showViewSelection"
-          :messages="mergedMessages"
-          @commit="onCommit"
-          @reset="reset"
-          @view-selection="viewSelection"
-        />
-      </slot>
-    </div>
-  </div>
+  <!-- Inline mode: render the panel directly -->
+  <DateRangePickerPanel v-if="mode === 'inline'">
+    <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
+      <slot name="nav-prev" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots['nav-next']" #nav-next="slotProps">
+      <slot name="nav-next" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots['action-bar']" #action-bar="slotProps">
+      <slot name="action-bar" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots.presets" #presets="slotProps">
+      <slot name="presets" v-bind="slotProps" />
+    </template>
+  </DateRangePickerPanel>
 
-  <!-- Input mode: text input + popover -->
+  <!-- Input mode: text input + popover wrapping the panel -->
   <div v-else ref="inputWrapperEl" class="drp-date-range-input-wrapper">
     <DateRangeInput
       :start="start"
@@ -224,66 +221,29 @@ const hasPresets = computed(() => presetGroups.value.some((g) => g.length > 0))
         <slot name="input" v-bind="bindings" />
       </template>
     </DateRangeInput>
-    <Popover :open="popoverOpen" :anchor="inputWrapperEl" @close="closePopover">
-      <div class="drp-date-range-picker" :style="themeStyle">
-        <slot v-if="hasPresets" name="presets" :groups="presetGroups" :on-select="onSelectPreset">
-          <PresetList :groups="presetGroups" @select="onSelectPreset" />
-        </slot>
-        <div class="drp-date-range-picker__main">
-          <CalendarNavigation
-            :left-year="leftMonth.year"
-            :left-month="leftMonth.month"
-            :left-grid="leftGrid"
-            :right-year="rightMonth.year"
-            :right-month="rightMonth.month"
-            :right-grid="rightGrid"
-            :messages="mergedMessages"
-            :locale="locale"
-            :month-picker-side="monthPickerSide"
-            :year-picker-side="yearPickerSide"
-            :year-picker-base-year="yearPickerBaseYear"
-            :drag-source-side="dragSourceSide"
-            @prev="navigatePrev"
-            @next="navigateNext"
-            @select-day="selectDay"
-            @click-month-header="openMonthPicker"
-            @click-year-header="openYearPicker"
-            @select-month="selectMonth"
-            @select-year="selectYear"
-            @drag-start-endpoint="startDragEndpoint"
-            @drag-hover="updateDragHover"
-            @drag-drop="commitDrag"
-            @drag-end="cancelDrag"
-            @auto-page-prev="pageSourcePrev"
-            @auto-page-next="pageSourceNext"
-          >
-            <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
-              <slot name="nav-prev" v-bind="slotProps" />
-            </template>
-            <template v-if="$slots['nav-next']" #nav-next="slotProps">
-              <slot name="nav-next" v-bind="slotProps" />
-            </template>
-          </CalendarNavigation>
-          <slot
-            name="action-bar"
-            :state="pickerMode"
-            :show-view-selection="showViewSelection"
-            :on-commit="onCommit"
-            :on-reset="reset"
-            :on-view-selection="viewSelection"
-          >
-            <ActionBar
-              :state="pickerMode"
-              :show-view-selection="showViewSelection"
-              :messages="mergedMessages"
-              @commit="onCommit"
-              @reset="reset"
-              @view-selection="viewSelection"
-            />
-          </slot>
-        </div>
-      </div>
-    </Popover>
+    <slot
+      name="popover"
+      :open="popoverOpen"
+      :anchor="inputWrapperEl"
+      :on-close="closePopover"
+    >
+      <Popover :open="popoverOpen" :anchor="inputWrapperEl" @close="closePopover">
+        <DateRangePickerPanel>
+          <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
+            <slot name="nav-prev" v-bind="slotProps" />
+          </template>
+          <template v-if="$slots['nav-next']" #nav-next="slotProps">
+            <slot name="nav-next" v-bind="slotProps" />
+          </template>
+          <template v-if="$slots['action-bar']" #action-bar="slotProps">
+            <slot name="action-bar" v-bind="slotProps" />
+          </template>
+          <template v-if="$slots.presets" #presets="slotProps">
+            <slot name="presets" v-bind="slotProps" />
+          </template>
+        </DateRangePickerPanel>
+      </Popover>
+    </slot>
   </div>
 </template>
 
@@ -311,24 +271,6 @@ const hasPresets = computed(() => presetGroups.value.some((g) => g.length > 0))
 </style>
 
 <style scoped>
-.drp-date-range-picker {
-  display: inline-flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--drp-border);
-  border-radius: 12px;
-  background: var(--drp-bg);
-  font-family: var(--drp-font);
-  color: var(--drp-text);
-}
-
-.drp-date-range-picker__main {
-  display: flex;
-  flex-direction: column;
-}
-
 .drp-date-range-input-wrapper {
   display: inline-block;
 }

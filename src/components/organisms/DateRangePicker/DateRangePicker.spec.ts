@@ -269,6 +269,45 @@ describe('DateRangePicker', () => {
       expect(document.body.querySelector('.drp-popover')).not.toBeNull()
     })
 
+    it('forwards the popover slot, replacing the built-in popover', async () => {
+      const direct = mount(DateRangePicker, {
+        props: { mode: 'input' },
+        slots: {
+          popover: `<template #popover="p">
+            <div v-if="p.open" class="custom-popover" @click="p.onClose">
+              <DateRangePickerPanel />
+            </div>
+          </template>`,
+        } as never,
+        global: {
+          components: {
+            // Re-export of the panel — the consumer would import it from the package.
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            DateRangePickerPanel: (
+              await import('@/components/organisms/DateRangePickerPanel')
+            ).DateRangePickerPanel,
+          },
+        },
+        attachTo: document.body,
+      })
+      mountedWrappers.push(direct)
+
+      // Built-in popover is not rendered when the slot is provided.
+      expect(document.body.querySelector('.drp-popover')).toBeNull()
+      expect(direct.find('.custom-popover').exists()).toBe(false)
+
+      // Focus opens the slot's popover with the panel inside.
+      await direct.find('input').trigger('focus')
+      await nextTick()
+      expect(direct.find('.custom-popover').exists()).toBe(true)
+      expect(direct.find('.drp-calendar-month').exists()).toBe(true)
+
+      // onClose closes it.
+      await direct.find('.custom-popover').trigger('click')
+      await nextTick()
+      expect(direct.find('.custom-popover').exists()).toBe(false)
+    })
+
     it('committing via the action bar closes the popover', async () => {
       const w = mountInput()
       await w.find('input').trigger('focus')
