@@ -6,16 +6,43 @@ const props = withDefaults(defineProps<PopoverProps>(), { offset: 4 })
 
 const emit = defineEmits<{ close: [] }>()
 
+const VIEWPORT_MARGIN = 8
+
 const popoverEl = ref<HTMLDivElement | null>(null)
 const position = ref({ top: 0, left: 0 })
 
 function updatePosition() {
   if (!props.anchor) return
-  const rect = props.anchor.getBoundingClientRect()
-  position.value = {
-    top: rect.bottom + window.scrollY + props.offset,
-    left: rect.left + window.scrollX,
+  const anchor = props.anchor.getBoundingClientRect()
+  const pop = popoverEl.value?.getBoundingClientRect()
+  const popWidth = pop?.width ?? 0
+  const popHeight = pop?.height ?? 0
+  const offset = props.offset
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+
+  // Flip above the anchor when there is not enough room below and more above.
+  const spaceBelow = vh - anchor.bottom
+  const spaceAbove = anchor.top
+  const flipUp =
+    popHeight > 0 &&
+    spaceBelow < popHeight + offset + VIEWPORT_MARGIN &&
+    spaceAbove > spaceBelow
+
+  const top = flipUp
+    ? anchor.top + window.scrollY - popHeight - offset
+    : anchor.bottom + window.scrollY + offset
+
+  // Shift left so the popover stays within the viewport.
+  let left = anchor.left + window.scrollX
+  if (popWidth > 0) {
+    const maxLeft = window.scrollX + vw - popWidth - VIEWPORT_MARGIN
+    const minLeft = window.scrollX + VIEWPORT_MARGIN
+    left = Math.min(left, maxLeft)
+    left = Math.max(left, minLeft)
   }
+
+  position.value = { top, left }
 }
 
 function onMouseDown(e: MouseEvent) {
