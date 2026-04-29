@@ -28,10 +28,10 @@
   "type": "module",
   "main": "./dist/date-range-picker.cjs",
   "module": "./dist/date-range-picker.js",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/date-range-picker.js",
       "require": "./dist/date-range-picker.cjs"
     },

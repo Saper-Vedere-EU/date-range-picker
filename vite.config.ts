@@ -12,6 +12,7 @@ export default defineConfig({
       tsconfigPath: './tsconfig.build.json',
       include: ['src/**/*.ts', 'src/**/*.vue'],
       exclude: ['src/**/*.spec.ts', 'src/**/*.test.ts', 'src/main.ts', 'src/App.vue'],
+      entryRoot: 'src',
       cleanVueFileName: true,
     }),
   ],
