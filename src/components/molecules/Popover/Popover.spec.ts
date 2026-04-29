@@ -119,7 +119,7 @@ describe('Popover', () => {
     expect(pop.style.top).toBe('356px')
   })
 
-  it('shifts left when the anchor is near the right edge of the viewport', async () => {
+  it('aligns the popover right edge with the anchor right edge when overflowing right', async () => {
     setViewport(800, 1000)
     const w = makeHost(true)
     await nextTick()
@@ -130,7 +130,7 @@ describe('Popover', () => {
     pop.getBoundingClientRect = () => makeRect({ top: 0, bottom: 250, left: 0, right: 400 })
     window.dispatchEvent(new Event('resize'))
     await nextTick()
-    // viewport - popWidth - margin = 800 - 400 - 8 = 392
-    expect(pop.style.left).toBe('392px')
+    // anchor.right - popWidth = 780 - 400 = 380
+    expect(pop.style.left).toBe('380px')
   })
 })

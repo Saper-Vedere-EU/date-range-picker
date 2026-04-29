@@ -33,12 +33,17 @@ function updatePosition() {
     ? anchor.top + window.scrollY - popHeight - offset
     : anchor.bottom + window.scrollY + offset
 
-  // Shift left so the popover stays within the viewport.
+  // Default: align the popover's left edge with the anchor's left edge.
+  // If that overflows the viewport on the right, align the popover's right
+  // edge with the anchor's right edge instead. Finally, clamp to the left
+  // viewport edge.
   let left = anchor.left + window.scrollX
   if (popWidth > 0) {
-    const maxLeft = window.scrollX + vw - popWidth - VIEWPORT_MARGIN
+    const rightLimit = window.scrollX + vw - VIEWPORT_MARGIN
+    if (left + popWidth > rightLimit) {
+      left = anchor.right + window.scrollX - popWidth
+    }
     const minLeft = window.scrollX + VIEWPORT_MARGIN
-    left = Math.min(left, maxLeft)
     left = Math.max(left, minLeft)
   }
 
