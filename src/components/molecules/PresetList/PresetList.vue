@@ -12,31 +12,44 @@ const nonEmptyGroups = computed(() => props.groups.filter((g) => g.length > 0))
 
 <template>
   <div class="drp-preset-list">
-    <template v-for="(group, gIndex) in nonEmptyGroups" :key="gIndex">
-      <hr v-if="gIndex > 0" class="drp-preset-list__separator" />
-      <ul class="drp-preset-list__group">
-        <li v-for="(preset, pIndex) in group" :key="pIndex" class="drp-preset-list__item">
-          <button
-            type="button"
-            class="drp-preset-btn"
-            @click="emit('select', preset)"
-          >
-            {{ preset.title }}
-          </button>
-        </li>
-      </ul>
-    </template>
+    <div class="drp-preset-list__scroll">
+      <template v-for="(group, gIndex) in nonEmptyGroups" :key="gIndex">
+        <hr v-if="gIndex > 0" class="drp-preset-list__separator" />
+        <ul class="drp-preset-list__group">
+          <li v-for="(preset, pIndex) in group" :key="pIndex" class="drp-preset-list__item">
+            <button type="button" class="drp-preset-btn" @click="emit('select', preset)">
+              {{ preset.title }}
+            </button>
+          </li>
+        </ul>
+      </template>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .drp-preset-list {
+  /*
+   * Outer wrapper: lets the column match the panel's height via flex
+   * `align-self: stretch` (the panel sets `align-items: stretch`). The inner
+   * `__scroll` uses `flex: 1 1 0` so its content does NOT contribute to this
+   * column's intrinsic block size — the panel's height is therefore driven by
+   * the calendar, not by the number of presets.
+   */
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 0 0;
+  border-right: 1px solid var(--drp-border);
+  min-height: 0;
+}
+
+.drp-preset-list__scroll {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 0 12px 0 0;
-  border-right: 1px solid var(--drp-border);
-  min-width: 160px;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .drp-preset-list__group {

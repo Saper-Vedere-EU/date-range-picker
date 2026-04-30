@@ -12,10 +12,7 @@ import { defaultMessages, type DateRangePickerMessages } from '@/messages'
 import { themeToCssVars, type DateRangePickerTheme } from '@/theme'
 import type { DateRangeInputSlotBindings } from '@/components/molecules/DateRangeInput'
 import type { DateRangePickerMode } from './types'
-import {
-  dateRangePickerContextKey,
-  type DateRangePickerContext,
-} from './context'
+import { dateRangePickerContextKey, type DateRangePickerContext } from './context'
 import type {
   DateRangePickerPanelNavSlotProps,
   DateRangePickerPanelActionBarSlotProps,
@@ -199,7 +196,7 @@ provide(dateRangePickerContextKey, context)
     <template v-if="$slots['action-bar']" #action-bar="slotProps">
       <slot name="action-bar" v-bind="slotProps" />
     </template>
-    <template v-if="$slots.presets" #presets="slotProps">
+    <template v-if="$slots['presets']" #presets="slotProps">
       <slot name="presets" v-bind="slotProps" />
     </template>
   </DateRangePickerPanel>
@@ -221,12 +218,7 @@ provide(dateRangePickerContextKey, context)
         <slot name="input" v-bind="bindings" />
       </template>
     </DateRangeInput>
-    <slot
-      name="popover"
-      :open="popoverOpen"
-      :anchor="inputWrapperEl"
-      :on-close="closePopover"
-    >
+    <slot name="popover" :open="popoverOpen" :anchor="inputWrapperEl" :on-close="closePopover">
       <Popover :open="popoverOpen" :anchor="inputWrapperEl" @close="closePopover">
         <DateRangePickerPanel>
           <template v-if="$slots['nav-prev']" #nav-prev="slotProps">
@@ -238,7 +230,7 @@ provide(dateRangePickerContextKey, context)
           <template v-if="$slots['action-bar']" #action-bar="slotProps">
             <slot name="action-bar" v-bind="slotProps" />
           </template>
-          <template v-if="$slots.presets" #presets="slotProps">
+          <template v-if="$slots['presets']" #presets="slotProps">
             <slot name="presets" v-bind="slotProps" />
           </template>
         </DateRangePickerPanel>
