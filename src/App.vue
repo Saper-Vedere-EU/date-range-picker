@@ -2,9 +2,10 @@
 import { ref } from 'vue'
 import { DateRangePicker } from './components/organisms/DateRangePicker'
 import type { DateRangePickerMode, DateRangePickerTheme, DateRangePickerPreset } from './index'
+import { endOfMonth } from 'date-fns'
 
-const start = ref<Date | undefined>()
-const end = ref<Date | undefined>()
+const start = ref<Date | undefined>(new Date(2026, 3, 1))
+const end = ref<Date | undefined>(endOfMonth(new Date(2026, 3, 1)))
 const mode = ref<DateRangePickerMode>('inline')
 
 const themes: Record<string, Partial<DateRangePickerTheme>> = {

@@ -106,6 +106,8 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     const rs = rangeStart.value
     const re = rangeEnd.value
     const dateTime = date.getTime()
+    const isRangeStart = rs !== null && isSameDay(date, rs)
+    const isRangeEnd = re !== null && isSameDay(date, re)
 
     return {
       date,
@@ -115,9 +117,15 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
         date.getFullYear() !== displayMonth.year || date.getMonth() + 1 !== displayMonth.month,
       isSelected:
         mode.value === 'selecting' && anchor.value !== null && isSameDay(date, anchor.value),
-      isRangeStart: rs !== null && isSameDay(date, rs),
-      isRangeEnd: re !== null && isSameDay(date, re),
-      isInRange: rs !== null && re !== null && dateTime > rs.getTime() && dateTime < re.getTime(),
+      isRangeStart,
+      isRangeEnd,
+      isInRange:
+        rs !== null &&
+        re !== null &&
+        !isRangeStart &&
+        !isRangeEnd &&
+        dateTime > rs.getTime() &&
+        dateTime < re.getTime(),
       isDisabled: false,
     }
   }
