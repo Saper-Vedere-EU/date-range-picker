@@ -23,10 +23,15 @@ if (!ctx) {
     '<DateRangePickerPanel> must be used inside <DateRangePicker> — no picker context was provided.',
   )
 }
+
+const version = __DRP_VERSION__
 </script>
 
 <template>
   <div class="drp-date-range-picker" :style="ctx.themeStyle.value">
+    <span v-if="ctx.showVersion.value" class="drp-version-watermark" aria-hidden="true">
+      v{{ version }}
+    </span>
     <slot
       v-if="ctx.hasPresets.value"
       name="presets"
@@ -100,6 +105,7 @@ if (!ctx) {
 
 <style scoped>
 .drp-date-range-picker {
+  position: relative;
   display: inline-flex;
   flex-direction: row;
   align-items: stretch;
@@ -115,5 +121,18 @@ if (!ctx) {
 .drp-date-range-picker__main {
   display: flex;
   flex-direction: column;
+}
+
+.drp-version-watermark {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  font-size: 10px;
+  font-family: var(--drp-font);
+  color: var(--drp-muted-text);
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: 0.02em;
 }
 </style>

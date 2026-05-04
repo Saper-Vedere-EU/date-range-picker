@@ -13,6 +13,7 @@ export interface DateRangePickerContext {
   locale: ComputedRef<string>
   messages: ComputedRef<DateRangePickerMessages>
   themeStyle: ComputedRef<Record<string, string>>
+  showVersion: ComputedRef<boolean>
 
   mode: ComputedRef<PickerState>
   leftMonth: ComputedRef<YearMonth>

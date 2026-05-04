@@ -2,10 +2,18 @@ import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import dts from 'vite-plugin-dts'
 import { resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
+
+const pkg = JSON.parse(
+  readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf-8'),
+) as { version: string }
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __DRP_VERSION__: JSON.stringify(pkg.version),
+  },
   plugins: [
     vue(),
     dts({

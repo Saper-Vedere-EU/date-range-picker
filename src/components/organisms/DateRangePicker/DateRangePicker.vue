@@ -32,6 +32,12 @@ const props = withDefaults(
     inputSeparator?: string
     inputPlaceholder?: string
     presets?: DateRangePickerPresets
+    /**
+     * Display the library version as a small watermark in the bottom-right
+     * corner of the panel. Useful when debugging which build a consumer is
+     * actually running. Defaults to `false`.
+     */
+    showVersion?: boolean
   }>(),
   {
     locale: 'fr-FR',
@@ -42,6 +48,7 @@ const props = withDefaults(
     inputSeparator: ' - ',
     inputPlaceholder: undefined,
     presets: () => [],
+    showVersion: false,
   },
 )
 
@@ -51,6 +58,7 @@ const mergedMessages = computed<DateRangePickerMessages>(() => ({
   ...props.messages,
 }))
 const themeStyle = computed(() => themeToCssVars(props.theme))
+const showVersion = computed(() => props.showVersion)
 
 // Input-mode state
 const popoverOpen = ref(false)
@@ -152,6 +160,7 @@ const context: DateRangePickerContext = {
   locale: localeRef,
   messages: mergedMessages,
   themeStyle,
+  showVersion,
   mode: pickerMode,
   leftMonth,
   rightMonth,

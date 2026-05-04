@@ -2,11 +2,11 @@
 import { ref } from 'vue'
 import { DateRangePicker } from './components/organisms/DateRangePicker'
 import type { DateRangePickerMode, DateRangePickerTheme, DateRangePickerPreset } from './index'
-import { endOfMonth } from 'date-fns'
+import { endOfMonth, startOfMonth, subMonths } from 'date-fns'
 
-const start = ref<Date | undefined>(new Date(2026, 3, 1))
-const end = ref<Date | undefined>(endOfMonth(new Date(2026, 3, 1)))
-const mode = ref<DateRangePickerMode>('inline')
+const start = ref<Date | undefined>(startOfMonth(subMonths(new Date(), 1)))
+const end = ref<Date | undefined>(endOfMonth(subMonths(new Date(), 1)))
+const mode = ref<DateRangePickerMode>('input')
 
 const themes: Record<string, Partial<DateRangePickerTheme>> = {
   default: {},
@@ -152,6 +152,7 @@ const presets: DateRangePickerPreset[][] = [
       :theme="themes[current]"
       :mode="mode"
       :presets="presets"
+      show-version
     >
       <!-- Demonstrates the #input slot: a fancy wrapped input replacing the default
            drp-input. In a real app this could be PrimeVue's <InputText />, Vuetify's
