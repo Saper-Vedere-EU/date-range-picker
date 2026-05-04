@@ -57,4 +57,30 @@ describe('PresetList', () => {
     expect(w.findAll('button')).toHaveLength(0)
     expect(w.findAll('hr')).toHaveLength(0)
   })
+
+  it('marks the preset whose range matches currentStart/currentEnd as active', () => {
+    const w = mount(PresetList, {
+      props: {
+        groups: [[today, last7, thisMonth]],
+        currentStart: new Date(2026, 3, 21),
+        currentEnd: new Date(2026, 3, 27),
+      },
+    })
+    const buttons = w.findAll('button')
+    expect(buttons[0].classes()).not.toContain('drp-preset-btn--active')
+    expect(buttons[1].classes()).toContain('drp-preset-btn--active')
+    expect(buttons[1].attributes('aria-pressed')).toBe('true')
+    expect(buttons[2].classes()).not.toContain('drp-preset-btn--active')
+  })
+
+  it('does not mark any preset active when currentStart/currentEnd are null', () => {
+    const w = mount(PresetList, {
+      props: {
+        groups: [[today, last7]],
+        currentStart: null,
+        currentEnd: null,
+      },
+    })
+    expect(w.findAll('.drp-preset-btn--active')).toHaveLength(0)
+  })
 })

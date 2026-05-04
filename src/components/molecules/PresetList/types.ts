@@ -14,4 +14,11 @@ export type DateRangePickerPresets = DateRangePickerPreset[] | DateRangePickerPr
 export interface PresetListProps {
   /** Already normalised to groups by the parent. */
   groups: DateRangePickerPreset[][]
+  /**
+   * Current effective start date. Used to mark the matching preset as active.
+   * `null`/`undefined` when no range is active (e.g. mid-selection).
+   */
+  currentStart?: Date | null
+  /** Current effective end date. See {@link currentStart}. */
+  currentEnd?: Date | null
 }

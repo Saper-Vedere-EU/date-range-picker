@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { isSameDay } from '@/composables/useDateRangePicker/calendar-utils'
 import type { DateRangePickerPreset, PresetListProps } from './types'
 
 const props = defineProps<PresetListProps>()
@@ -8,6 +9,14 @@ const emit = defineEmits<{
 }>()
 
 const nonEmptyGroups = computed(() => props.groups.filter((g) => g.length > 0))
+
+function isPresetActive(preset: DateRangePickerPreset): boolean {
+  const cs = props.currentStart
+  const ce = props.currentEnd
+  if (!cs || !ce) return false
+  const { start, end } = preset.getRange()
+  return isSameDay(start, cs) && isSameDay(end, ce)
+}
 </script>
 
 <template>
@@ -17,7 +26,13 @@ const nonEmptyGroups = computed(() => props.groups.filter((g) => g.length > 0))
         <hr v-if="gIndex > 0" class="drp-preset-list__separator" />
         <ul class="drp-preset-list__group">
           <li v-for="(preset, pIndex) in group" :key="pIndex" class="drp-preset-list__item">
-            <button type="button" class="drp-preset-btn" @click="emit('select', preset)">
+            <button
+              type="button"
+              class="drp-preset-btn"
+              :class="{ 'drp-preset-btn--active': isPresetActive(preset) }"
+              :aria-pressed="isPresetActive(preset)"
+              @click="emit('select', preset)"
+            >
               {{ preset.title }}
             </button>
           </li>
@@ -94,5 +109,14 @@ const nonEmptyGroups = computed(() => props.groups.filter((g) => g.length > 0))
 .drp-preset-btn:focus-visible {
   outline: none;
   border-color: var(--drp-accent-border);
+}
+
+.drp-preset-btn--active {
+  background: var(--drp-accent);
+  color: var(--drp-on-accent);
+}
+
+.drp-preset-btn--active:hover {
+  background: var(--drp-accent-pressed);
 }
 </style>

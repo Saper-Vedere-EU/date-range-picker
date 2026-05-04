@@ -31,9 +31,16 @@ if (!ctx) {
       v-if="ctx.hasPresets.value"
       name="presets"
       :groups="ctx.presetGroups.value"
+      :current-start="ctx.currentStart.value"
+      :current-end="ctx.currentEnd.value"
       :on-select="ctx.onSelectPreset"
     >
-      <PresetList :groups="ctx.presetGroups.value" @select="ctx.onSelectPreset" />
+      <PresetList
+        :groups="ctx.presetGroups.value"
+        :current-start="ctx.currentStart.value"
+        :current-end="ctx.currentEnd.value"
+        @select="ctx.onSelectPreset"
+      />
     </slot>
     <div class="drp-date-range-picker__main">
       <CalendarNavigation

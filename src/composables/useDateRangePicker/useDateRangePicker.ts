@@ -465,6 +465,8 @@ export function useDateRangePicker(options: UseDateRangePickerOptions) {
     rightMonth: computed(() => rightMonth.value),
     leftGrid,
     rightGrid,
+    rangeStart,
+    rangeEnd,
     showViewSelection,
     monthPickerSide: computed(() => monthPickerSide.value),
     yearPickerSide: computed(() => yearPickerSide.value),

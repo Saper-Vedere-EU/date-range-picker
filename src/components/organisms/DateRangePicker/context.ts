@@ -27,6 +27,10 @@ export interface DateRangePickerContext {
 
   presetGroups: ComputedRef<DateRangePickerPreset[][]>
   hasPresets: ComputedRef<boolean>
+  /** Effective start date driving the calendar/preset highlight. */
+  currentStart: ComputedRef<Date | null>
+  /** Effective end date driving the calendar/preset highlight. */
+  currentEnd: ComputedRef<Date | null>
   onSelectPreset: (preset: DateRangePickerPreset) => void
 
   selectDay: (date: Date) => void
